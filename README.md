@@ -1,10 +1,15 @@
-## mtp's dotfiles
+## edvintb's dotfiles
 
 ### Setup Instructions
 
-- Install the relevant requirements
 - Clone this repo to `$HOME/.dotfiles`
-- Run `symlink.sh`
+- Install the relevant requirements
+    - [Optional] Homebrew path
+    - Use the Brewfile to install requirements using homebrew
+    - Oh-my-zsh installed through curl and the managed plugins are cloned
+      separately
+- Run `symlink.sh` to link the dotfiles in $HOME to the dotfiles in this
+  repository
 - Use `bin/` for any scripts you want added to `$PATH`
 - Use `zshrc_private/` for any environment variables and additional configuration. All files in this directory are sourced at the bottom of `.zshrc`
 
@@ -17,10 +22,11 @@
         - Highlighting: [syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
 - Terminal Manager: [tmux](https://github.com/tmux/tmux)
 - Editor: [nvim](https://github.com/neovim/neovim)
+- Pager: [delta](https://github.com/dandavison/delta?tab=readme-ov-file)
 - Conda: [miniforge](https://github.com/conda-forge/miniforge)
 
 
-#### Useful Command Line Tools
+#### Command Line Tools
 
 - [ripgrep](https://github.com/BurntSushi/ripgrep)
 - [fzf](https://github.com/junegunn/fzf)
@@ -35,24 +41,6 @@
 - Window Manager: [AeroSpace](https://github.com/nikitabobko/AeroSpace)
 - Keyboard Customizer: [Karabiner-Elements](https://karabiner-elements.pqrs.org)
 - Night Shift: [flux](https://justgetflux.com/)
-
-
-### Linux Setup
-
-- Distro: [arch](https://wiki.archlinux.org/title/Installation_guide)
-    - AUR Helper: [yay](https://github.com/Jguer/yay)
-- Terminal Emulator: [kitty](https://sw.kovidgoyal.net/kitty/)
-    - Font: [FiraCode Nerd Font](https://archlinux.org/packages/extra/any/ttf-firacode-nerd/)
-- Window Manager: [i3](https://i3wm.org/)
-    - Brightness: [brightnessctl](https://github.com/Hummer12007/brightnessctl)
-    - Status Bar: [i3status](https://man.archlinux.org/man/i3status.1)
-    - Night Shift: [redshift](https://wiki.archlinux.org/title/Redshift)
-- Audio: [pipewire](https://wiki.archlinux.org/title/PipeWire)
-    - GUI: [pavucontrol](https://archlinux.org/packages/extra/x86_64/pavucontrol/)
-    - [wireplumber](https://wiki.archlinux.org/title/WirePlumber)
-    - [pipewire-pulse](https://archlinux.org/packages/extra/x86_64/pipewire-pulse/)
-- Keyboard Customizer: [keyd](https://github.com/rvaiya/keyd)
-
 
 ### `neovim` Setup
 

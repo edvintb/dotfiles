@@ -42,6 +42,14 @@ alias p=python3
 alias sw=swatch
 alias tms=tmux-sessionizer
 alias kssh="kitty +kitten ssh"
+alias k='kubectl'
+alias gs='bash ~/bin-personal/git_status'
+alias glog='git log --graph --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%an%C(reset)%C(bold yellow)%d%C(reset) %C(dim white)- %s%C(reset)" --all'
+alias gd='git diff'
+alias ga='git add'
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
 
 # no beep
 unsetopt BEEP LIST_BEEP
