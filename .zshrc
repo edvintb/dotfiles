@@ -86,3 +86,7 @@ function accept-autosuggestion-widget() {
 zle -N accept-autosuggestion-widget  # Register the widget with ZLE
 bindkey '^Y' accept-autosuggestion-widget  # Bind Ctrl+Y to the custom widget
 ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(accept-autosuggestion-widget)
+
+if [ ! -S ~/.ssh/ssh_auth_sock ] && [ -S "$SSH_AUTH_SOCK" ]; then
+    ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
+fi
