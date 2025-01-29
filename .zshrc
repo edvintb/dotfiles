@@ -1,7 +1,28 @@
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
-ZSH_THEME=robbyrussell
+ZSH_THEME=""
+
+autoload -U promptinit; promptinit
+
+# optionally define some options
+PURE_CMD_MAX_EXEC_TIME=10
+
+# turn on git stash status
+zstyle :prompt:pure:git:stash show yes
+
+zstyle :prompt:pure:virtualenv show no
+
+zstyle :prompt:pure:git:branch color red
+
+zstyle :prompt:pure:host color 242
+
+zstyle :prompt:pure:user color 242
+
+export CONDA_DEFAULT_ENV=""
+# conda config --set changeps1 False
+
+prompt pure
 
 plugins=(
     git

@@ -4,3 +4,5 @@ brew 'ripgrep'
 brew 'fzf'
 brew 'gh'
 brew 'git-delta'
+brew 'pure'
+
