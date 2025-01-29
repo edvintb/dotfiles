@@ -30,3 +30,4 @@ link $HOME/.dotfiles/aerospace $HOME/.config/aerospace
 # directories
 link $HOME/.dotfiles/bin $HOME/bin-personal
 
+mkdir $HOME/vault
