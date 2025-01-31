@@ -5,4 +5,4 @@ brew 'fzf'
 brew 'gh'
 brew 'git-delta'
 brew 'pure'
-
+brew 'tmux'

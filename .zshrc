@@ -53,6 +53,9 @@ if [[ -f $ZSHRC_WORK ]]; then
     source $ZSHRC_WORK
 fi
 
+# source the virtual env wrapper
+source $HOME/.dotfiles/bin/venv_wrapper
+
 # enable fzf completion
 source <(fzf --zsh)
 
