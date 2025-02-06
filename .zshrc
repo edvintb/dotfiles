@@ -44,6 +44,11 @@ export PATH=$PATH:$HOME/bin-work
 export PATH=$PATH:/Applications/kitty.app/Contents/MacOS
 export PATH=/opt/homebrew/opt/llvm/bin:$PATH  # want to use this version of clang first
 
+# Add path to custom binaries -- apt in old ubuntu versions won't download updated versions
+export PATH=$PATH:$HOME/neovim/build/bin
+export PATH=$PATH:$HOME/fzf/bin
+export PATH=$PATH:$HOME/delta/target/release
+
 # source private config
 ZSHRC_PRIVATE=~/.dotfiles/zshrc_private
 if [[ -f $ZSHRC_PRIVATE ]]; then
@@ -51,7 +56,7 @@ if [[ -f $ZSHRC_PRIVATE ]]; then
 fi
 
 # source work zshrc
-ZSHRC_WORK=~/.dotfiles-work/.zshrc
+ZSHRC_WORK=$HOME/.dotfiles/.dotfiles-work/.zshrc
 if [[ -f $ZSHRC_WORK ]]; then
     source $ZSHRC_WORK
 fi
@@ -77,6 +82,9 @@ alias ga='git add'
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
+
+# reve aliases
+alias qu-install="pip3 install git+ssh://git@github.com/reve-ai/queryfile-util.git"
 
 # no beep
 unsetopt BEEP LIST_BEEP

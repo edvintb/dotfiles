@@ -30,4 +30,8 @@ link $HOME/.dotfiles/aerospace $HOME/.config/aerospace
 # directories
 link $HOME/.dotfiles/bin $HOME/bin-personal
 
+# make obsidian vault
 mkdir $HOME/vault
+
+# link the tmux
+link $HOME/.dotfiles/tmux/tmux.conf $HOME/.tmux.conf
