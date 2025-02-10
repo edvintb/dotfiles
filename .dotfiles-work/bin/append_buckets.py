@@ -28,6 +28,10 @@ def parse_args(args):
 
     file_path = sys.argv[1]
 
+    if file_path == sys.stdout:
+        print("output should be different from input")
+        sys.exit(1)
+
     try:
         csv_file = open(file_path, 'r')
         return csv_file

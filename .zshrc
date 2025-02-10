@@ -49,6 +49,10 @@ export PATH=$PATH:$HOME/neovim/build/bin
 export PATH=$PATH:$HOME/fzf/bin
 export PATH=$PATH:$HOME/delta/target/release
 
+# Set the XDG_CONFIG_HOME env variable
+# export XDG_CONFIG_HOME=$HOME/.config/nvim
+# export XDG_CONFIG_HOME=""
+
 # source private config
 ZSHRC_PRIVATE=~/.dotfiles/zshrc_private
 if [[ -f $ZSHRC_PRIVATE ]]; then
@@ -82,6 +86,9 @@ alias ga='git add'
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
+cl() {
+  cd "$1" && ls
+}
 
 # reve aliases
 alias qu-install="pip3 install git+ssh://git@github.com/reve-ai/queryfile-util.git"
