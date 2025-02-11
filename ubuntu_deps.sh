@@ -4,6 +4,7 @@
 # download tmux from github
 # wget https://github.com/tmux/tmux/releases/download/3.5/tmux-3.5.tar.gz  # Replace 3.4 with the latest version
 # tar -zxf tmux-3.5.tar.gz
+# rm tmux-3.5.tar.gz
 # cd tmux-3.5
 
 # a recent node version is required to run lsp's in neovim
