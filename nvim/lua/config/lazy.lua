@@ -51,8 +51,8 @@ require("lazy").setup({
     { 'mbbill/undotree' },
     { 'lewis6991/gitsigns.nvim' },
     { "numToStr/Comment.nvim" },
-    { "lukas-reineke/indent-blankline.nvim" },
-
+    -- { "lukas-reineke/indent-blankline.nvim" },
+    { "lukas-reineke/indent-blankline.nvim", main = "ibl", opts = {} },
     {
         'folke/trouble.nvim',
         dependencies = { 'nvim-tree/nvim-web-devicons' },
@@ -80,7 +80,9 @@ require("lazy").setup({
         branch = 'v2.x',
         dependencies = {
             -- lsp
-            {'neovim/nvim-lspconfig'},             -- Required
+            {
+                'neovim/nvim-lspconfig'  -- Required
+            },
             {                                      -- Optional
                 'williamboman/mason.nvim',
                 build = function()
@@ -101,8 +103,6 @@ require("lazy").setup({
             { "rafamadriz/friendly-snippets" }
         }
     },
-    { 'lvimuser/lsp-inlayhints.nvim' },
-
     -- language-specific plugins
     { 'mfussenegger/nvim-jdtls' },
     -- { 'simrat39/rust-tools.nvim' },

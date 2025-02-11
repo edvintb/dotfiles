@@ -45,9 +45,14 @@ export PATH=$PATH:/Applications/kitty.app/Contents/MacOS
 export PATH=/opt/homebrew/opt/llvm/bin:$PATH  # want to use this version of clang first
 
 # Add path to custom binaries -- apt in old ubuntu versions won't download updated versions
-export PATH=$PATH:$HOME/neovim/build/bin
+# export PATH=$PATH:$HOME/neovim/build/bin
 export PATH=$PATH:$HOME/fzf/bin
 export PATH=$PATH:$HOME/delta/target/release
+export PATH=$HOME/.dotfiles/tmux-3.5/tmux:$PATH
+
+# set the tmux tmpdir environment variable
+export TMUX_TMPDIR=/tmp
+export TERM="xterm-256color"  # Or export TERM="xterm-kitty"
 
 # Set the XDG_CONFIG_HOME env variable
 # export XDG_CONFIG_HOME=$HOME/.config/nvim
