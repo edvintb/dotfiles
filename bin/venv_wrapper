@@ -5,36 +5,46 @@
 # $ deactivate          # deactivates venv
 # $ rmvenv myvirtualenv # removes venv
 
-export VENV_HOME="."
+export VENV_HOME="~/.virtualenvs"
 
 venv() {
   if [ $# -eq 0 ]
     then
-      source "$VENV_HOME/.venv/bin/activate"
-      echo "Activated .venv"
+      source "./.venv/bin/activate"
+      if [ $? -ne 0 ]
+        then
+          echo "Failed to activate .venv"
+      fi
     else
       source "$VENV_HOME/$1/bin/activate"
+      if [ $? -ne 0 ]
+        then
+          echo "Failed to activate $VENV_HOME/$1"
+      fi
   fi
 }
 
 mkvenv() {
   if [ $# -eq 0 ]
     then
-      python3 -m venv $VENV_HOME/.venv
+      python3 -m venv ./.venv
       echo "Created .venv"
       venv
     else
       python3 -m venv $VENV_HOME/$1
+      echo "Created $1"
+      venv $1
   fi
 }
 
 rmvenv() {
+  deactivate
   if [ $# -eq 0 ]
     then
-      deactivate
-      rm -r $VENV_HOME/.venv
+      rm -r ./.venv
       echo "Removed .venv"
     else
       rm -r $VENV_HOME/$1
+      echo "Removed $1"
   fi
 }

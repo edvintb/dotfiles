@@ -36,8 +36,6 @@ lsp.on_attach(function(client, bufnr)
             d = "vim.diagnostic.goto_next()",
         },
     })
-
-    require("lsp-inlayhints").on_attach(client, bufnr)
 end)
 
 lsp.nvim_workspace() -- Fix Undefined global 'vim'

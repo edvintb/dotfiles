@@ -26,6 +26,9 @@ require("lazy").setup({
 
     { 'nvim-lualine/lualine.nvim' },
 
+    -- ai assistant
+    { 'augmentcode/augment.vim' },
+
     {
         'nvim-telescope/telescope.nvim',
         dependencies = { 'nvim-lua/plenary.nvim' },
