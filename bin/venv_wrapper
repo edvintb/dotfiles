@@ -5,7 +5,7 @@
 # $ deactivate          # deactivates venv
 # $ rmvenv myvirtualenv # removes venv
 
-export VENV_HOME="~/.virtualenvs"
+export VENV_HOME="$HOME/.virtualenvs"
 
 venv() {
   if [ $# -eq 0 ]

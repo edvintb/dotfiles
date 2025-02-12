@@ -27,7 +27,11 @@ require("lazy").setup({
     { 'nvim-lualine/lualine.nvim' },
 
     -- ai assistant
-    { 'augmentcode/augment.vim' },
+    {
+        'augmentcode/augment.vim',
+        branch = "prerelease",
+        version = false,
+    },
 
     {
         'nvim-telescope/telescope.nvim',
@@ -138,7 +142,7 @@ require("lazy").setup({
     defaults = {
         lazy = false,
         version = false,
-    }
+    },
 })
 
 --     {
