@@ -22,20 +22,16 @@ lsp.on_attach(function(client, bufnr)
     vim.keymap.set("n", "[d", function() vim.diagnostic.goto_prev() end, opts)
     vim.keymap.set("n", "]d", function() vim.diagnostic.goto_next() end, opts)
     vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, opts)
-    vim.keymap.set("n", "gc", function() vim.lsp.buf.rename() end, opts)
+    vim.keymap.set("n", "gR", function() vim.lsp.buf.rename() end, opts)
     vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)
-    wk.register({
-        g = {
-            d = "vim.lsp.buf.definition()",
-            c = "vim.lsp.buf.rename()",
-        },
-        ["["] = {
-            d = "vim.diagnostic.goto_prev()",
-        },
-        ["]"] = {
-            d = "vim.diagnostic.goto_next()",
-        },
-    })
+    wk.add(
+        {
+            { "gd", desc = "vim.lsp.buf.definition()" },
+            { "gR", desc = "vim.lsp.buf.rename()" },
+            { "[d", desc = "vim.diagnostic.goto_prev()" },
+            { "]d", desc = "vim.diagnostic.goto_next()" },
+        }
+    )
 end)
 
 lsp.nvim_workspace() -- Fix Undefined global 'vim'
@@ -44,13 +40,12 @@ lsp.setup()
 
 vim.keymap.set('n', '<leader>li', '<cmd>LspInfo<cr>')
 vim.keymap.set('n', '<leader>ll', '<cmd>LspLog<cr>')
-wk.register({
-    l = {
-        l = 'LspLog',
-        i = 'LspInfo',
-    },
-}, { prefix = '<leader>' })
-
+wk.add(
+  {
+    { "<leader>li", desc = "LspInfo" },
+    { "<leader>ll", desc = "LspLog" },
+  }
+)
 -- TODO: should this be somewhere else?
 -- rust setup
 require('lspconfig').rust_analyzer.setup({
