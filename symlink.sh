@@ -26,10 +26,10 @@ link $HOME/.dotfiles/i3 $HOME/.config/i3
 link $HOME/.dotfiles/i3status $HOME/.config/i3status
 link $HOME/.dotfiles/redshift $HOME/.config/redshift
 link $HOME/.dotfiles/aerospace $HOME/.config/aerospace
+link $HOME/.dotfiles/karabiner $HOME/.config/karabiner
 
 # directories
 link $HOME/.dotfiles/bin $HOME/bin-personal
-
 # make obsidian vault
 mkdir $HOME/vault
 
