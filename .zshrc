@@ -86,6 +86,7 @@ alias kssh="kitty +kitten ssh"
 alias k='kubectl'
 alias gs='bash ~/bin-personal/git_status'
 alias glog='git log --graph --format=format:"%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%an%C(reset)%C(bold yellow)%d%C(reset) %C(dim white)- %s%C(reset)" --all'
+alias prune-branches='git fetch --prune && git branch -vv | grep ": gone]" | awk "{print \$1}" | xargs -r git branch -D'
 alias gd='git diff'
 alias ga='git add'
 alias ll='ls -alF'
