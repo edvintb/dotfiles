@@ -46,3 +46,11 @@
 
 TODO: give overview
 
+
+### Alfred configuration
+
+1. Set Cmd+Space to be the key to open the alfred window
+2. Under Advanced, disable the ctrl key and force a US keyboard
+3. Under Features->Universal Actions, disable Ctrl (required to use the
+   caps->ctrl+escape remapping)
+4. Enable clipboard history
