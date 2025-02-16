@@ -8,17 +8,17 @@ vim.keymap.set("n", "<leader>xd", function() require("trouble").open("document_d
 vim.keymap.set("n", "<leader>xq", function() require("trouble").open("quickfix") end, opts)
 vim.keymap.set("n", "<leader>xl", function() require("trouble").open("loclist") end, opts)
 vim.keymap.set("n", "gr", function() require("trouble").open("lsp_references") end, opts)
-wk.register({
-    x = {
-        x = 'trouble.toggle()',
-        w = 'trouble.open(workspace_diagnostics)',
-        d = 'trouble.open(document_diagnostics)',
-        q = 'trouble.open(quickfix)',
-        l = 'trouble.open(loclist)',
-    },
-}, { prefix = '<leader>' })
-wk.register({
-    g = {
-        r = 'trouble.open(lsp_references)',
-    },
-})
+wk.add(
+  {
+    { "<leader>xd", desc = "trouble.open(document_diagnostics)" },
+    { "<leader>xl", desc = "trouble.open(loclist)" },
+    { "<leader>xq", desc = "trouble.open(quickfix)" },
+    { "<leader>xw", desc = "trouble.open(workspace_diagnostics)" },
+    { "<leader>xx", desc = "trouble.toggle()" },
+  }
+)
+wk.add(
+  {
+    { "gr", desc = "trouble.open(lsp_references)" },
+  }
+)

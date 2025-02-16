@@ -2,3 +2,6 @@ TODO.md
 zshrc_private*
 !.gitkeep
 lazygit/state.yml
+tmux-*/
+tmux-*.tar.gz
+

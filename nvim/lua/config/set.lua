@@ -47,6 +47,7 @@ vim.cmd([[autocmd BufEnter,BufNewFile,BufRead * set formatoptions-=cro]])
 -- switch colon and semicolon
 vim.keymap.set('n', ';', ':', { noremap = true })
 vim.keymap.set('n', ':', ';', { noremap = true })
+vim.keymap.set('n', 'q;', 'q:', { noremap = true })
 
 -- code folding
 vim.opt.foldmethod = "expr"
