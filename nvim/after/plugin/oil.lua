@@ -18,6 +18,7 @@ oil.setup({
         ["gx"] = "actions.open_external",
         ["g."] = "actions.toggle_hidden",
         ["g\\"] = "actions.toggle_trash",
+        ["gy"] = "actions.yank_entry",
     },
     use_default_keymaps = false,
     view_options = {
