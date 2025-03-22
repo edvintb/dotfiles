@@ -12,6 +12,9 @@ sudo apt-get install ninja-build gettext cmake curl build-essential
 # cd into the repo -- assumes cloned to $HOME
 cd $HOME/neovim
 
+# checkout the stable release
+git checkout stable
+
 # build binary using cmake
 # make CMAKE_BUILD_TYPE=Release
 # make CMAKE_BUILD_TYPE=Debug
