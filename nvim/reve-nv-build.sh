@@ -3,16 +3,19 @@
 # exit if a command fails
 set -e
 
+nvim_path=$HOME/neovim
+
 # install build pre-reqs
 sudo apt-get install ninja-build gettext cmake curl build-essential
 
-# Clone the neovim repo -- script assumes this has already been done
-# git clone https://github.com/neovim/neovim $HOME/neovim
+# remove repo (if exists) and clone the latest version
+rm -rf $nvim_path
+git clone https://github.com/neovim/neovim $nvim_path
 
-# cd into the repo -- assumes cloned to $HOME
-cd $HOME/neovim
+# cd into the repo
+cd $nvim_path
 
-# checkout the stable release
+# checkout the stable release -- no need to use anything unstable
 git checkout stable
 
 # build binary using cmake
