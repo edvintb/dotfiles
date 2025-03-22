@@ -9,6 +9,11 @@ vim.g.maplocalleader = " "
 vim.opt.nu = true
 vim.opt.rnu = true
 
+-- augment working directories --
+vim.g.augment_workspace_folders = {
+    "~/reve-training-data",
+}
+
 -- tabs
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4

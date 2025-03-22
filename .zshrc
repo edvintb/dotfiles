@@ -48,7 +48,6 @@ export PATH=/opt/homebrew/opt/llvm/bin:$PATH  # want to use this version of clan
 # export PATH=$PATH:$HOME/neovim/build/bin
 export PATH=$PATH:$HOME/fzf/bin
 export PATH=$PATH:$HOME/delta/target/release
-export PATH=$HOME/.dotfiles/tmux-3.5/tmux:$PATH
 
 # set the tmux tmpdir environment variable
 export TMUX_TMPDIR=/tmp
@@ -93,8 +92,11 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 cl() {
-  cd "$1" && ls
+  cd "$1"; ls
 }
+
+# set an alias for printing path in a nice way
+alias print-path="echo '$PATH' | tr ':' '\n'"
 
 # reve aliases
 alias qu-install="pip3 install git+ssh://git@github.com/reve-ai/queryfile-util.git"
