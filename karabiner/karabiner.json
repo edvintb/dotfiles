@@ -10,7 +10,7 @@
                                 "from": {
                                     "key_code": "h",
                                     "modifiers": {
-                                        "mandatory": ["fn"],
+                                        "mandatory": ["left_control", "left_alt", "left_gui"],
                                         "optional": ["any"]
                                     }
                                 },
@@ -21,7 +21,7 @@
                                 "from": {
                                     "key_code": "j",
                                     "modifiers": {
-                                        "mandatory": ["fn"],
+                                        "mandatory": ["left_control", "left_alt", "left_gui"],
                                         "optional": ["any"]
                                     }
                                 },
@@ -32,7 +32,7 @@
                                 "from": {
                                     "key_code": "k",
                                     "modifiers": {
-                                        "mandatory": ["fn"],
+                                        "mandatory": ["left_control", "left_alt", "left_gui"],
                                         "optional": ["any"]
                                     }
                                 },
@@ -43,7 +43,7 @@
                                 "from": {
                                     "key_code": "l",
                                     "modifiers": {
-                                        "mandatory": ["fn"],
+                                        "mandatory": ["left_control", "left_alt", "left_gui"],
                                         "optional": ["any"]
                                     }
                                 },

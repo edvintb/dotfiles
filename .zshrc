@@ -127,3 +127,4 @@ export NVM_DIR="$HOME/.nvm"
 . "$HOME/.cargo/env"
 
 fpath+=~/.zfunc; autoload -Uz compinit; compinit
+PATH="${PATH}:/Users/edvintb/go/bin"
