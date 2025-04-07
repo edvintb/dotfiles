@@ -53,3 +53,49 @@ require('lspconfig').rust_analyzer.setup({
         'rustup', 'run', 'stable', 'rust-analyzer',
     },
 })
+
+require('lspconfig').ruff.setup {
+  -- Your other ruff_lsp configurations here
+
+  capabilities = require('cmp_nvim_lsp').default_capabilities(),
+
+  on_attach = function(client, bufnr)
+    -- Format on Save (Conditional)
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      buffer = bufnr,
+      callback = function()
+        if client.supports_method("textDocument/formatting") then
+          vim.lsp.buf.format({ bufnr = bufnr })
+        else
+          vim.notify("Ruff formatter not available for this buffer.", vim.log.levels.WARN)
+        end
+      end,
+    })
+
+    -- Keybinding to Format (Conditional)
+    vim.keymap.set('n', '<leader>lf', function()
+      if client.supports_method("textDocument/formatting") then
+        vim.lsp.buf.format()
+      else
+        vim.notify("Ruff formatter not available for this buffer.", vim.log.levels.WARN)
+      end
+    end, { buffer = bufnr, desc = '[L]sp [F]ormat' })
+
+    -- Your other on_attach configurations here
+  end,
+}
+
+require('lspconfig').pyright.setup {
+  settings = {
+    pyright = {
+      -- Using Ruff's import organizer
+      disableOrganizeImports = true,
+    },
+    python = {
+      analysis = {
+        -- Ignore all files for analysis to exclusively use Ruff for linting
+        ignore = { '*' },
+      },
+    },
+  },
+}
