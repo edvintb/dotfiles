@@ -15,6 +15,14 @@ require('telescope').setup{
                 ["<C-c>"] = actions.close,
             },
         },
+        -- Make find_files start in the Neovim CWD
+        find_files_opts = {
+            cwd_to_path = true,
+        },
+        -- Set default search directory for live_grep to Neovim CWD
+        live_grep_opts = {
+            search_dirs = { vim.fn.getcwd() },
+        },
         -- TODO: figure out how to make this better
         -- doesn't show the directory structure at all
         path_display = {"smart"},
@@ -35,40 +43,39 @@ vim.keymap.set('n', '<leader>fp', builtin.diagnostics, {}) -- "find problems"
 vim.keymap.set('n', '<leader>fr', builtin.lsp_references, {}) -- "find references"
 vim.keymap.set('n', '<leader>fk', builtin.keymaps, {}) -- "find keymaps"
 wk.add(
-  {
-    { "<leader>fb", desc = "telescope.builtin.buffers" },
-    { "<leader>fd", desc = "telescope.builtin.find_files" },
-    { "<leader>fg", desc = "telescope.builtin.live_grep" },
-    { "<leader>fh", desc = "telescope.builtin.help_tags" },
-    { "<leader>fk", desc = "telescope.builtin.keymaps" },
-    { "<leader>fp", desc = "telescope.builtin.diagnostics" },
-    { "<leader>fr", desc = "telescope.builtin.lsp_references" },
-  }
+    {
+        { "<leader>fb", desc = "telescope.builtin.buffers" },
+        { "<leader>fd", desc = "telescope.builtin.find_files" },
+        { "<leader>fg", desc = "telescope.builtin.live_grep" },
+        { "<leader>fh", desc = "telescope.builtin.help_tags" },
+        { "<leader>fk", desc = "telescope.builtin.keymaps" },
+        { "<leader>fp", desc = "telescope.builtin.diagnostics" },
+        { "<leader>fr", desc = "telescope.builtin.lsp_references" },
+    }
 )
 -- searching
 function vim.getVisualSelection()
-	vim.cmd('noau normal! "vy"')
-	local text = vim.fn.getreg('v')
-	vim.fn.setreg('v', {})
+    vim.cmd('noau normal! "vy"')
+    local text = vim.fn.getreg('v')
+    vim.fn.setreg('v', {})
 
-	text = string.gsub(text, "\n", "")
-	if #text > 0 then
-		return text
-	else
-		return ''
-	end
+    text = string.gsub(text, "\n", "")
+    if #text > 0 then
+        return text
+    else
+        return ''
+    end
 end
 
 local opts = { noremap = true, silent = true }
 vim.keymap.set('n', '<space>fG', ':Telescope current_buffer_fuzzy_find<cr>', opts)
 vim.keymap.set('v', '<space>fG', function()
-	local text = vim.getVisualSelection()
-	builtin.current_buffer_fuzzy_find({ default_text = text })
+    local text = vim.getVisualSelection()
+    builtin.current_buffer_fuzzy_find({ default_text = text })
 end, opts)
 
 vim.keymap.set('n', '<space>fg', ':Telescope live_grep<cr>', opts)
 vim.keymap.set('v', '<space>fg', function()
-	local text = vim.getVisualSelection()
-	builtin.live_grep({ default_text = text })
+    local text = vim.getVisualSelection()
+    builtin.live_grep({ default_text = text })
 end, opts)
-

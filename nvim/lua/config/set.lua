@@ -5,9 +5,11 @@ vim.opt.guicursor = ""
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+vim.g.augment_disable_completions = false
+
 -- line numbers
-vim.opt.nu = true
-vim.opt.rnu = true
+vim.opt.nu = false
+vim.opt.rnu = false
 
 -- augment working directories --
 vim.g.augment_workspace_folders = {

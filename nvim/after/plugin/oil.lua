@@ -9,7 +9,7 @@ oil.setup({
         -- ["<C-t>"] = "actions.select_tab",
         -- ["<C-p>"] = "actions.preview",
         ["<C-c>"] = "actions.close",
-        ["<C-r>"] = "actions.refresh",
+        ["<C-r>"] = "actions.refresh",  -- Changed from <C-l> to <C-r>
         ["-"] = "actions.parent",
         ["_"] = "actions.open_cwd",
         ["`"] = "actions.cd",

@@ -32,7 +32,17 @@ require("lazy").setup({
         branch = "prerelease",
         version = false,
     },
-
+    -- kitty navigation integration
+    -- {
+    --     "knubie/vim-kitty-navigator",
+    --     build = "cp ./*.py ~/.config/kitty/",
+    -- },
+    -- tmux navigation integration
+    {
+        "christoomey/vim-tmux-navigator",
+        lazy = false,  -- Ensure plugin loads at startup
+    },
+    -- file and buffer navigation
     {
         'nvim-telescope/telescope.nvim',
         dependencies = { 'nvim-lua/plenary.nvim' },
@@ -113,8 +123,7 @@ require("lazy").setup({
     -- language-specific plugins
     { 'mfussenegger/nvim-jdtls' },
     -- { 'simrat39/rust-tools.nvim' },
-
-    { "aserowy/tmux.nvim" },
+    -- { "aserowy/tmux.nvim" },
     {
         'stevearc/oil.nvim',
         opts = {},
