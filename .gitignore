@@ -1,8 +1,8 @@
 TODO.md
-zshrc_private*
 nvim/lazy-lock.json
-!.gitkeep
-lazygit/state.yml
-tmux-*/
-tmux-*.tar.gz
+# zshrc_private*
+# !.gitkeep
+# lazygit/state.yml
+# tmux-*/
+# tmux-*.tar.gz
 
