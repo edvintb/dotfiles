@@ -45,6 +45,7 @@
     sp = stash pop
     sm = stash push -m
     ss = switch -
+    r1 = reset HEAD~1
 
 [commit]
     verbose = true

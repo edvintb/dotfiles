@@ -95,8 +95,14 @@ cl() {
   cd "$1"; ls
 }
 
-# set an alias for printing path in a nice way
+# alias for printing PATH in a readable way
 alias print-path="echo '$PATH' | tr ':' '\n'"
+
+# get the present working file
+pwf() {
+  # $1 : relative filename
+  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+}
 
 # reve aliases
 alias qu-install="pip3 install git+ssh://git@github.com/reve-ai/queryfile-util.git"

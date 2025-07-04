@@ -6,7 +6,7 @@ set -e
 nvim_path=$HOME/neovim
 
 # install build pre-reqs
-sudo apt-get install ninja-build gettext cmake curl build-essential
+sudo apt-get install ninja-build gettext cmake curl build-essential -y
 
 # remove repo (if exists) and clone the latest version
 rm -rf $nvim_path

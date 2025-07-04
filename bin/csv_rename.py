@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 import sys
+import os
+import tempfile
+import shutil
 
 def rename_csv_header_in_place(filepath, old_name, new_name):
     """
@@ -13,26 +16,37 @@ def rename_csv_header_in_place(filepath, old_name, new_name):
     """
 
     try:
-        with open(filepath, 'r+b') as f:
-            first_line = f.readline()
-            decoded_line = first_line.decode('utf-8')
-            headers = [h.strip() for h in decoded_line.split(',')]
+        # Create a temporary file
+        temp_file_fd, temp_file_path = tempfile.mkstemp()
+        header_changed = False
+        
+        with os.fdopen(temp_file_fd, 'wb') as temp_file:
+            with open(filepath, 'rb') as original_file:
+                # Read and modify the first line
+                first_line = original_file.readline()
+                decoded_line = first_line.decode('utf-8')
+                headers = [h.strip() for h in decoded_line.split(',')]
+                
+                for i, header in enumerate(headers):
+                    if header == old_name:
+                        headers[i] = new_name
+                        header_changed = True
+                
+                if not header_changed:
+                    print(f"Header '{old_name}' not found.")
+                    os.unlink(temp_file_path)
+                    return False
 
-            header_changed = False
-            for i, header in enumerate(headers):
-                if header == old_name:
-                    headers[i] = new_name
-                    header_changed = True
-                    break  # Stop after finding and renaming the header
-
-            if header_changed:
+                # Write the modified header to the temp file
                 new_header_line = ','.join(headers) + '\n'
-                encoded_new_header = new_header_line.encode('utf-8')
-                f.seek(0)
-                f.write(encoded_new_header)
-                f.truncate()
-            else:
-                print(f"Header '{old_name}' not found.")
+                temp_file.write(new_header_line.encode('utf-8'))
+                
+                # Copy the rest of the file
+                shutil.copyfileobj(original_file, temp_file)
+        
+                # Replace the original file with the temp file
+                shutil.move(temp_file_path, filepath)
+                return True
 
     except FileNotFoundError:
         print(f"File not found: {filepath}")

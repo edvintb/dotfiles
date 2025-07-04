@@ -2,14 +2,17 @@
 
 # check out the latest release branch after cd into repo: git checkout <latest stable branch name>
 
+# kill the current tmux server
+tmux kill-server
+
 # install build packages 
-apt-get install libevent-dev ncurses-dev build-essential bison pkg-config
+apt-get install libevent-dev ncurses-dev build-essential bison pkg-config -y
 
 # install configuration dependencies
-apt-get install autoconf automake
+apt-get install autoconf automake -y
 
 # install run dependencies
-apt-get install libevent ncurses
+apt-get install libevent ncurses -y
 
 # clone and install into $HOME
 cd $HOME

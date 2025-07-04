@@ -58,10 +58,10 @@ rmvenv() {
   deactivate
   if [ $# -eq 0 ]
     then
-      rm -r ./.venv
+      rm -rf ./.venv
       echo "Removed .venv"
     else
-      rm -r $VENV_HOME/$1
+      rm -rf $VENV_HOME/$1
       echo "Removed $1"
   fi
 }

@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+# Check if lsof is installed
+if ! command -v lsof &> /dev/null; then
+    echo "lsof not found. Installing..."
+    sudo apt-get update
+    sudo apt-get install lsof -y
+else
+    echo "lsof is already installed"
+fi
+
+# Find all processes that have open files or directories within ~/.vscode-server
+if [ -d ~/.vscode-server ]; then
+  pids=$(sudo lsof +D ~/.vscode-server -Fp | grep -oP 'p\K\d+')
+else
+  pids=""
+  echo "~/.vscode-server directory does not exist."
+  exit 0
+fi
+
+if [ -n "$pids" ]; then
+  echo "Found the following processes using files in ~/.vscode-server:"
+  echo "$pids"
+
+  read -p "Do you want to kill these processes? (y/N) " confirm
+
+  if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
+    echo "Attempting to kill the processes..."
+    for pid in $pids; do
+      sudo kill "$pid" 2>/dev/null
+    done
+
+    sleep 2 # Give processes a moment to terminate
+
+    # Check if any processes are still alive
+    remaining_pids=$(sudo lsof +D ~/.vscode-server -Fp | grep -oP 'p\K\d+')
+    if [ -n "$remaining_pids" ]; then
+      echo "Some processes did not terminate gracefully. Forcefully killing them..."
+      for pid in $remaining_pids; do
+        sudo kill -9 "$pid" 2>/dev/null
+      done
+    else
+      echo "All processes successfully terminated."
+    fi
+
+    echo "Attempting to remove the ~/.vscode-server directory..."
+    rm -rf ~/.vscode-server
+    if [ $? -eq 0 ]; then
+      echo "~/.vscode-server directory removed successfully."
+    else
+      echo "Failed to remove ~/.vscode-server directory. You might still have some processes holding files open or permission issues."
+    fi
+  else
+    echo "Not killing any processes. ~/.vscode-server directory will not be removed."
+  fi
+else
+  echo "No processes found using files in ~/.vscode-server. Attempting to remove the directory..."
+  rm -rf ~/.vscode-server
+  if [ $? -eq 0 ]; then
+    echo "~/.vscode-server directory removed successfully."
+  else
+    echo "Failed to remove ~/.vscode-server directory (no blocking processes found). You might have permission issues."
+  fi
+fi
+
+exit 0
