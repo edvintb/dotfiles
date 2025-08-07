@@ -57,11 +57,19 @@ mkvenv() {
 rmvenv() {
   deactivate
   if [ $# -eq 0 ]
-    then
-      rm -rf ./.venv
+  then
+    echo "Removing .venv..."
+    if rm -rf ./.venv; then
       echo "Removed .venv"
     else
-      rm -rf $VENV_HOME/$1
+      echo "Failed to remove .venv"
+    fi
+  else
+    echo "Removing $1..."
+    if rm -rf $VENV_HOME/$1; then
       echo "Removed $1"
+    else
+      echo "Failed to remove $1"
+    fi
   fi
 }
