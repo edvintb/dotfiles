@@ -9,6 +9,9 @@ vim.keymap.set("n", "J", "mzJ`z")
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
 
+-- format function arguments onto separate lines
+vim.keymap.set("n", "<leader>fa", "f(a<CR><ESC>f)i<CR><ESC>V?def<CR>k>j:s/, /,\r/g<CR>A,<ESC>")
+
 -- search up and down with the cursor centered
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
