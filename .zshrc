@@ -106,6 +106,7 @@ pwf() {
 
 # reve aliases
 alias qu-install="pip3 install git+ssh://git@github.com/reve-ai/queryfile-util.git"
+alias ray-stop-latest="ray job list | grep -oP "job_id='[0-9a-fA-F]{8}'" | sort -r | head -n 1 | grep -oP "[0-9a-fA-F]{8}" | xargs ray job stop"
 
 # no beep
 unsetopt BEEP LIST_BEEP
@@ -134,3 +135,5 @@ export NVM_DIR="$HOME/.nvm"
 
 fpath+=~/.zfunc; autoload -Uz compinit; compinit
 PATH="${PATH}:/Users/edvintb/go/bin"
+
+. "$HOME/.local/bin/env"

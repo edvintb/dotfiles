@@ -31,6 +31,7 @@ require("lazy").setup({
         'augmentcode/augment.vim',
         branch = "prerelease",
         version = false,
+        enabled = true,
     },
     -- kitty navigation integration
     -- {

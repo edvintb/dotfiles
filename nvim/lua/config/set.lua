@@ -8,7 +8,7 @@ vim.g.maplocalleader = " "
 vim.g.augment_disable_completions = false
 
 -- line numbers
-vim.opt.nu = false
+vim.opt.nu = true
 vim.opt.rnu = false
 
 -- augment working directories --
