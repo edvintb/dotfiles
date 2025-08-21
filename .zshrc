@@ -41,6 +41,8 @@ source $ZSH/oh-my-zsh.sh
 export PATH=$PATH:$HOME/bin
 export PATH=$PATH:$HOME/bin-personal
 export PATH=$PATH:$HOME/bin-work
+# this is where uv is installed
+export PATH=$PATH:/mnt/home/.local/bin
 export PATH=$PATH:/Applications/kitty.app/Contents/MacOS
 export PATH=/opt/homebrew/opt/llvm/bin:$PATH  # want to use this version of clang first
 
@@ -56,6 +58,8 @@ export TERM="xterm-256color"  # Or export TERM="xterm-kitty"
 # Set the XDG_CONFIG_HOME env variable
 # export XDG_CONFIG_HOME=$HOME/.config/nvim
 # export XDG_CONFIG_HOME=""
+
+export PIP_EXTRA_INDEX_URL="https://us-west1-python.pkg.dev/dev-infra-422317/reve-python-packages/simple"
 
 # source private config
 ZSHRC_PRIVATE=~/.dotfiles/zshrc_private
