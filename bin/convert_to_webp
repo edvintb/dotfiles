@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+# --- WebP Image Conversion Script ---
+#
+# This script converts all JPG, JPEG, PNG, GIF, BMP, and TIFF images in the
+# current directory to the WebP format using ffmpeg.
+#
+# If the conversion for a file is successful, the original file is deleted.
+#
+# Prerequisites:
+# - ffmpeg must be installed.
+#   - On Debian/Ubuntu: sudo apt-get install ffmpeg
+#   - On macOS (with Homebrew): brew install ffmpeg
+#
+# How to Use:
+# 1. Save this script as a file, for example, `convert_to_webp.sh`.
+# 2. Open your terminal.
+# 3. Navigate to the directory containing your photos.
+# 4. Copy the script into that directory.
+# 5. Make the script executable: chmod +x convert_to_webp.sh
+# 6. Run the script: ./convert_to_webp.sh
+#
+# WARNING: This script DELETES the original photos after conversion.
+# It is highly recommended to back up your photos before running it.
+
+# Set the quality for the WebP conversion (0-100). Higher is better quality.
+# 80 is a good balance between quality and file size.
+WEBP_QUALITY=80
+
+# Counter for successful conversions
+success_count=0
+shopt -s nullglob # Ensures the loop doesn't run if no files match
+
+# Loop through all specified image types in the current directory.
+# The pattern is case-insensitive for file extensions.
+for file in *.{jpg,jpeg,png,gif,bmp,tiff,JPG,JPEG,PNG,GIF,BMP,TIFF}; do
+    # Get the filename without the extension
+    base_filename="${file%.*}"
+    output_filename="${base_filename}.webp"
+
+    echo "----------------------------------------"
+    echo "Processing: $file"
+
+    # Check if the converted file already exists
+    if [ -f "$output_filename" ]; then
+        echo "Skipping: '$output_filename' already exists."
+        continue
+    fi
+
+    # Use ffmpeg to convert the image.
+    # The '&&' operator ensures that 'rm "$file"' only runs if ffmpeg exits successfully.
+    ffmpeg -i "$file" -c:v libwebp -q:v "$WEBP_QUALITY" "$output_filename" && rm "$file"
+
+    # Check the exit code of the last command to see if it was successful
+    if [ $? -eq 0 ]; then
+        echo "Successfully converted '$file' to '$output_filename' and removed original."
+        ((success_count++))
+    else
+        echo "Error: Failed to convert '$file'. The original file has not been removed."
+    fi
+done
+
+shopt -u nullglob # Unset nullglob
+echo "----------------------------------------"
+echo "Conversion complete. Successfully converted $success_count files."
+

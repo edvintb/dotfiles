@@ -53,7 +53,7 @@ export PATH=$PATH:$HOME/delta/target/release
 
 # set the tmux tmpdir environment variable
 export TMUX_TMPDIR=/tmp
-export TERM="xterm-256color"  # Or export TERM="xterm-kitty"
+export TERM="xterm-kitty"  # Or export TERM="xterm-kitty"
 
 # Set the XDG_CONFIG_HOME env variable
 # export XDG_CONFIG_HOME=$HOME/.config/nvim
@@ -110,7 +110,6 @@ pwf() {
 
 # reve aliases
 alias qu-install="pip3 install git+ssh://git@github.com/reve-ai/queryfile-util.git"
-alias ray-stop-latest="ray job list | grep -oP "job_id='[0-9a-fA-F]{8}'" | sort -r | head -n 1 | grep -oP "[0-9a-fA-F]{8}" | xargs ray job stop"
 
 # no beep
 unsetopt BEEP LIST_BEEP
