@@ -1,5 +1,6 @@
 TODO.md
 nvim/lazy-lock.json
+**/.zsh_secrets
 # zshrc_private*
 # !.gitkeep
 # lazygit/state.yml

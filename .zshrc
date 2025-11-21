@@ -53,13 +53,13 @@ export PATH=$PATH:$HOME/delta/target/release
 
 # set the tmux tmpdir environment variable
 export TMUX_TMPDIR=/tmp
-export TERM="xterm-kitty"  # Or export TERM="xterm-kitty"
+export TERM="xterm-256color"  # Or export TERM="xterm-kitty"
 
-# Set the XDG_CONFIG_HOME env variable
-# export XDG_CONFIG_HOME=$HOME/.config/nvim
-# export XDG_CONFIG_HOME=""
-
-export PIP_EXTRA_INDEX_URL="https://us-west1-python.pkg.dev/dev-infra-422317/reve-python-packages/simple"
+# source secrets
+ZSHRC_SECRETS=~/.dotfiles/.zsh_secrets
+if [[ -f $ZSHRC_PRIVATE ]]; then
+    source $ZSHRC_PRIVATE
+fi
 
 # source private config
 ZSHRC_PRIVATE=~/.dotfiles/zshrc_private
@@ -108,8 +108,51 @@ pwf() {
   echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 }
 
+uvl () {
+# 1. Extract the current directory name (no parent path)
+# Example: If PWD is /home/user/project_name, this extracts 'project_name'.
+local cur_dir=$(basename "$PWD")
+
+# 2. Define the absolute path for the virtual environment
+# e.g., /tmp/project_name/.venv
+# local venv_path="/tmp/${cur_dir}/.venv"
+#
+# # 3. Create the parent directory for the VENV if it doesn't exist.
+# # We suppress errors (2>/dev/null) in case the directory already exists.
+# mkdir -p "${venv_path}" 2>/dev/null
+#
+#
+# # 4. Execute the uv command with the calculated UV_PROJECT_ENVIRONMENT
+# # "$@" passes all arguments (sync, run, add, etc.) to the uv command.
+# UV_PROJECT_ENVIRONMENT="${venv_path}" uv --preview-features extra-build-dependencies "$@"
+
+# 2. Define the absolute paths for the VENV and the CACHE
+local venv_path="/tmp/${cur_dir}/.venv"
+local cache_path="/tmp/.uv-cache"
+
+echo -e "Using venv: \033[34m${venv_path}\033[0m and cache: \033[34m${cache_path}\033[0m"
+
+# 3. Create the necessary directories if they don't exist.
+mkdir -p "${venv_path}" "${cache_path}" 2>/dev/null
+
+# 4. Execute the uv command with calculated environment variables.
+#
+# We use a subshell (parentheses) to:
+# a) unset VIRTUAL_ENV to suppress the mismatch warning.
+# b) set UV_PROJECT_ENVIRONMENT (venv location).
+# c) set UV_CACHE_DIR (cache location in /tmp).
+# d) set UV_LINK_MODE=copy (to suppress the hardlink failure warning).
+(
+    unset VIRTUAL_ENV
+    UV_PROJECT_ENVIRONMENT="${venv_path}" \
+    UV_CACHE_DIR="${cache_path}" \
+    uv --preview-features extra-build-dependencies "$@"
+)
+
+}
+
 # reve aliases
-alias qu-install="pip3 install git+ssh://git@github.com/reve-ai/queryfile-util.git"
+alias qu-install="pip install -e /mnt/home/queryfile-util"
 
 # no beep
 unsetopt BEEP LIST_BEEP
@@ -137,6 +180,12 @@ export NVM_DIR="$HOME/.nvm"
 . "$HOME/.cargo/env"
 
 fpath+=~/.zfunc; autoload -Uz compinit; compinit
-PATH="${PATH}:/Users/edvintb/go/bin"
+
+# this is where the go binary lives
+export PATH="${PATH}:/Users/edvintb/go/bin"
+export PATH=$PATH:/usr/local/go/bin
+
+# this is where go places binaries
+export PATH=$PATH:/mnt/home/go/bin
 
 . "$HOME/.local/bin/env"
