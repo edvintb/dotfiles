@@ -57,8 +57,8 @@ export TERM="xterm-256color"  # Or export TERM="xterm-kitty"
 
 # source secrets
 ZSHRC_SECRETS=~/.dotfiles/.zsh_secrets
-if [[ -f $ZSHRC_PRIVATE ]]; then
-    source $ZSHRC_PRIVATE
+if [[ -f $ZSHRC_SECRETS ]]; then
+    source $ZSHRC_SECRETS
 fi
 
 # source private config
