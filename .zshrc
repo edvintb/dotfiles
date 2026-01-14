@@ -38,12 +38,12 @@ fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src  #
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
+# Prioritize local binaries first (custom builds of tmux, nvim, etc.)
+export PATH=$HOME/.local/bin:$PATH
+
 export PATH=$PATH:$HOME/bin
 export PATH=$PATH:$HOME/bin-personal
 export PATH=$PATH:$HOME/bin-work
-# this is where uv is installed
-export PATH=$PATH:/mnt/home/.local/bin
-export PATH=$PATH:/Applications/kitty.app/Contents/MacOS
 export PATH=/opt/homebrew/opt/llvm/bin:$PATH  # want to use this version of clang first
 
 # Add path to custom binaries -- apt in old ubuntu versions won't download updated versions
