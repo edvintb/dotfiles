@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 # Install Rust-based performance tools as specified in CLAUDE.md
-# All binaries will be installed to /mnt/home/.local/bin
+# All binaries will be installed to $HOME/.local/bin
 
 set -e
 
-BIN_DIR="/mnt/home/.local/bin"
+BIN_DIR="$HOME/.local/bin"
 mkdir -p "$BIN_DIR"
 
 echo "Installing Rust performance tools to $BIN_DIR"
@@ -24,7 +24,7 @@ install_cargo_tool() {
     local package=$1
     local binary=$2
     echo "Installing $package..."
-    cargo install "$package" --root /mnt/home/.local
+    cargo install "$package" --root "$HOME/.local"
     echo "✓ $package installed"
     echo ""
 }
