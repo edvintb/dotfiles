@@ -156,7 +156,7 @@ mkdir -p "${venv_path}" "${cache_path}" 2>/dev/null
 }
 
 # reve aliases
-alias qu-install="pip install -e /mnt/home/queryfile-util"
+alias qu-install="PYTHONUSERBASE=$HOME/.local pip install --user -e /mnt/home/queryfile-util"
 
 # no beep
 unsetopt BEEP LIST_BEEP
