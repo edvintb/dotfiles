@@ -19,6 +19,7 @@ link $HOME/.dotfiles/.gitconfig $HOME/.gitconfig
 # claude
 mkdir -p $HOME/.claude
 link $HOME/.dotfiles/claude/settings.json $HOME/.claude/settings.json
+link $HOME/.dotfiles/claude/CLAUDE.md $HOME/.claude/CLAUDE.md
 
 # .config
 link $HOME/.dotfiles/nvim $HOME/.config/nvim
