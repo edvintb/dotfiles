@@ -173,6 +173,13 @@ zle -N accept-autosuggestion-widget  # Register the widget with ZLE
 bindkey '^Y' accept-autosuggestion-widget  # Bind Ctrl+Y to the custom widget
 ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(accept-autosuggestion-widget)
 
+# Shift+Enter to insert newline in command line
+function insert-newline-widget() {
+    LBUFFER="${LBUFFER}"$'\n'
+}
+zle -N insert-newline-widget
+bindkey '^[[13;2u' insert-newline-widget  # Bind the kitty keyboard protocol Shift+Enter sequence
+
 if [ ! -S ~/.ssh/ssh_auth_sock ] && [ -S "$SSH_AUTH_SOCK" ]; then
     ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
 fi
