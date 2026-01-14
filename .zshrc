@@ -39,12 +39,15 @@ source $ZSH/oh-my-zsh.sh
 
 # User configuration
 # Prioritize local binaries first (custom builds of tmux, nvim, etc.)
-export PATH=$HOME/.local/bin:$PATH
-
+# Note: Order matters! Build PATH in priority order
+# First add standard directories
 export PATH=$PATH:$HOME/bin
 export PATH=$PATH:$HOME/bin-personal
 export PATH=$PATH:$HOME/bin-work
-export PATH=/opt/homebrew/opt/llvm/bin:$PATH  # want to use this version of clang first
+
+# Then prepend priority paths (in reverse order of priority)
+export PATH=/opt/homebrew/opt/llvm/bin:$PATH  # homebrew llvm (for clang)
+export PATH=$HOME/.local/bin:$PATH            # custom builds (highest priority)
 
 # Add path to custom binaries -- apt in old ubuntu versions won't download updated versions
 # export PATH=$PATH:$HOME/neovim/build/bin
