@@ -183,6 +183,9 @@ export NVM_DIR="$HOME/.nvm"
 
 . "$HOME/.cargo/env"
 
+# Initialize zoxide for smart directory navigation
+eval "$(zoxide init zsh)"
+
 fpath+=~/.zfunc; autoload -Uz compinit; compinit
 
 # this is where the go binary lives
