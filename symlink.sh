@@ -13,6 +13,7 @@ link() {
 
 # files
 link $HOME/.dotfiles/.zshrc $HOME/.zshrc
+link $HOME/.dotfiles/.bashrc $HOME/.bashrc
 link $HOME/.dotfiles/.gitconfig $HOME/.gitconfig
 
 # claude
