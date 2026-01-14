@@ -1,0 +1,79 @@
+{
+  "permissionMode": "default",
+  "allowedPrompts": [
+    {
+      "tool": "Bash",
+      "prompt": "read files and directories"
+    },
+    {
+      "tool": "Bash",
+      "prompt": "search files"
+    },
+    {
+      "tool": "Bash",
+      "prompt": "list files and directories"
+    },
+    {
+      "tool": "Bash",
+      "prompt": "show file contents"
+    },
+    {
+      "tool": "Bash",
+      "prompt": "check status"
+    },
+    {
+      "tool": "Bash",
+      "prompt": "view logs"
+    },
+    {
+      "tool": "Bash",
+      "prompt": "inspect configuration"
+    },
+    {
+      "tool": "Bash",
+      "prompt": "run read-only commands"
+    },
+    {
+      "tool": "Bash",
+      "prompt": "check system information"
+    },
+    {
+      "tool": "Bash",
+      "prompt": "run tests"
+    },
+    {
+      "tool": "Bash",
+      "prompt": "build the project"
+    },
+    {
+      "tool": "Bash",
+      "prompt": "install dependencies"
+    },
+    {
+      "tool": "Bash",
+      "prompt": "run linters and formatters"
+    }
+  ],
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/bin-personal/claude-notify.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/bin-personal/claude-notify.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

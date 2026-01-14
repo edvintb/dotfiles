@@ -15,6 +15,10 @@ link() {
 link $HOME/.dotfiles/.zshrc $HOME/.zshrc
 link $HOME/.dotfiles/.gitconfig $HOME/.gitconfig
 
+# claude
+mkdir -p $HOME/.claude
+link $HOME/.dotfiles/claude/settings.json $HOME/.claude/settings.json
+
 # .config
 link $HOME/.dotfiles/nvim $HOME/.config/nvim
 link $HOME/.dotfiles/tmux $HOME/.config/tmux
