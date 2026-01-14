@@ -12,6 +12,7 @@ brew 'fd'              # Fast alternative to find
 brew 'bat'             # Cat with syntax highlighting
 brew 'eza'             # Modern alternative to ls
 brew 'sd'              # Fast alternative to sed
+brew 'xcp'             # Fast alternative to cp with progress
 brew 'dust'            # Intuitive alternative to du
 brew 'bottom'          # Process/system monitor (btm)
 brew 'procs'           # Modern alternative to ps

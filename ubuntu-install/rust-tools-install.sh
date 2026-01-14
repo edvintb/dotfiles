@@ -40,6 +40,9 @@ install_cargo_tool "eza" "eza"
 # Text replacement
 install_cargo_tool "sd" "sd"
 
+# File copying
+install_cargo_tool "xcp" "xcp"
+
 # Disk usage
 install_cargo_tool "du-dust" "dust"
 
@@ -70,6 +73,7 @@ echo "  rg       - Fast alternative to 'grep'"
 echo "  bat      - Cat with syntax highlighting"
 echo "  eza      - Modern alternative to 'ls'"
 echo "  sd       - Fast alternative to 'sed'"
+echo "  xcp      - Fast alternative to 'cp' with progress"
 echo "  dust     - Intuitive alternative to 'du'"
 echo "  btm      - Bottom - process/system monitor"
 echo "  procs    - Modern alternative to 'ps'"
