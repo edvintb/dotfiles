@@ -1,5 +1,6 @@
 {
   "permissionMode": "default",
+  "vimMode": true,
   "allowedPrompts": [
     {
       "tool": "Bash",
