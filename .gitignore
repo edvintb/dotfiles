@@ -1,6 +1,7 @@
 TODO.md
 **/lazy-lock.json
 **/.zsh_secrets
+**/.nfs*
 # zshrc_private*
 # !.gitkeep
 # lazygit/state.yml

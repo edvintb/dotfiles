@@ -73,3 +73,21 @@ vim.opt.smartcase = true
 
 -- vertical split
 vim.keymap.set('n', '<leader>v', '<cmd>vsp<cr>', { noremap = true})
+
+-- auto-reload files changed on disk (only if buffer has no unsaved changes)
+vim.opt.autoread = true
+
+-- check for file changes every 4 seconds (when cursor stops moving)
+vim.api.nvim_create_autocmd({"CursorHold", "CursorHoldI"}, {
+    pattern = "*",
+    callback = function()
+        -- only check if buffer is not modified
+        if not vim.bo.modified then
+            vim.cmd('checktime')
+        end
+    end,
+})
+
+-- set the interval for CursorHold events (in milliseconds)
+-- this controls how often we check for file changes
+vim.opt.updatetime = 100

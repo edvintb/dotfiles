@@ -18,3 +18,17 @@
 ## Guidelines
 - Give up and try different search if file is not found within 15 seconds
 - All utilities installed in /mnt/home/.local/bin
+
+2. UV Package Manager
+
+## Usage
+- Use `uvl` instead of `uv` for running commands
+- `uvl` creates virtual environments in `/tmp/<project-name>/.venv` instead of the project directory
+- `uvl` uses a shared cache at `/tmp/.uv-cache` for faster dependency resolution
+- `uvl` automatically unsets VIRTUAL_ENV to avoid conflicts
+- IMPORTANT: Always source ~/.bashrc before using uvl for faster installs
+
+## Examples
+- `source ~/.bashrc && uvl sync` - Sync dependencies
+- `source ~/.bashrc && uvl run script.py` - Run a Python script
+- `source ~/.bashrc && uvl add package` - Add a package to dependencies

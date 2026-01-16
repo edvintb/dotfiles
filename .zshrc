@@ -158,6 +158,16 @@ mkdir -p "${venv_path}" "${cache_path}" 2>/dev/null
 # reve aliases
 alias qu-install="PYTHONUSERBASE=$HOME/.local pip install --user -e /mnt/home/queryfile-util"
 
+# History configuration (increased by 10x)
+HISTSIZE=300                    # Commands to keep in memory (10x increase from 30)
+SAVEHIST=10000                  # Commands to save to disk (10x increase from default 1000)
+HISTFILE=~/.zsh_history         # History file location
+setopt APPEND_HISTORY           # Append to history file instead of overwriting
+setopt SHARE_HISTORY            # Share history between all sessions
+setopt HIST_IGNORE_DUPS         # Don't record duplicate commands
+setopt HIST_IGNORE_SPACE        # Don't record commands starting with space
+setopt HIST_REDUCE_BLANKS       # Remove unnecessary blanks
+
 # no beep
 unsetopt BEEP LIST_BEEP
 
