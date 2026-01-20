@@ -1,4 +1,26 @@
 {
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/mnt/home/bin-personal/claude-notify.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/mnt/home/bin-personal/claude-notify.sh"
+          }
+        ]
+      }
+    ]
+  },
   "permissionMode": "default",
   "vimMode": true,
   "allowedPrompts": [
@@ -55,26 +77,5 @@
       "prompt": "run linters and formatters"
     }
   ],
-  "hooks": {
-    "Notification": [
-      {
-        "matcher": "permission_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/bin-personal/claude-notify.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "idle_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/bin-personal/claude-notify.sh"
-          }
-        ]
-      }
-    ]
-  }
+  "model": "opus"
 }
