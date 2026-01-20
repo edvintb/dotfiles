@@ -17,15 +17,17 @@ TYPE=$(echo "$INPUT" | grep -o '"notification_type":"[^"]*"' | sed 's/"notificat
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 echo "[$TIMESTAMP] [$TYPE] $MESSAGE" >> "$LOG_FILE"
 
-# Send notification via Kitty escape sequence (OSC 99)
-# Kitty handles these natively and displays as macOS desktop notifications
-# This works over SSH and displays on the local machine
+# Send notification via kitten notify
+# Uses Kitty's built-in notification system (OSC 99 protocol)
+# Works over SSH and displays on the local machine
 if [ -n "$MESSAGE" ]; then
-    # Kitty notification format (OSC 99 protocol)
-    printf '\x1b]99;i=1:d=0;Claude Code\x1b\\'
-    printf '\x1b]99;i=1:d=1:p=title;Claude Code - %s\x1b\\' "$TYPE"
-    printf '\x1b]99;i=1:d=1:p=body;%s\x1b\\' "$MESSAGE"
-    printf '\x1b]99;i=1:d=2;\x1b\\'
+    # Use kitten notify to generate and send the notification
+    # --only-print-escape-code makes it work in non-interactive contexts
+    kitten notify --only-print-escape-code \
+        --app-name "Claude Code" \
+        --urgency normal \
+        "Claude Code - $TYPE" \
+        "$MESSAGE"
 fi
 
 exit 0
