@@ -18,16 +18,14 @@ TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 echo "[$TIMESTAMP] [$TYPE] $MESSAGE" >> "$LOG_FILE"
 
 # Send notification via Kitty escape sequence (OSC 99)
-# This works over SSH and displays as a desktop notification
+# Kitty handles these natively and displays as macOS desktop notifications
+# This works over SSH and displays on the local machine
 if [ -n "$MESSAGE" ]; then
-    # Kitty notification format
+    # Kitty notification format (OSC 99 protocol)
     printf '\x1b]99;i=1:d=0;Claude Code\x1b\\'
     printf '\x1b]99;i=1:d=1:p=title;Claude Code - %s\x1b\\' "$TYPE"
     printf '\x1b]99;i=1:d=1:p=body;%s\x1b\\' "$MESSAGE"
     printf '\x1b]99;i=1:d=2;\x1b\\'
-
-    # Also ring the terminal bell for attention
-    printf '\a'
 fi
 
 exit 0
