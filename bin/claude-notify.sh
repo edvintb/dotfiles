@@ -32,9 +32,10 @@ fi
 echo "$CURRENT_TIME" > "$RATE_LIMIT_FILE"
 
 # Send notification using raw Kitty OSC 99 escape sequences
+# Write directly to /dev/tty to bypass Claude Code's output capture
 # Format: \e]99;metadata;payload\e\\
 # Title has d=0 (incomplete), body has d=1 (display now)
-if [ -n "$MESSAGE" ]; then
+if [ -n "$MESSAGE" ] && [ -e /dev/tty ]; then
     # Get machine name
     MACHINE=$(hostname -s)
 
@@ -48,15 +49,15 @@ if [ -n "$MESSAGE" ]; then
     if [ -n "$TMUX" ]; then
         # Wrap with tmux DCS passthrough
         # Send title (d=0 means incomplete, waiting for more)
-        printf '\ePtmux;\e\e]99;i=%s:d=0;%s\e\e\\\e\\' "$NOTIF_ID" "$TITLE"
+        printf '\ePtmux;\e\e]99;i=%s:d=0;%s\e\e\\\e\\' "$NOTIF_ID" "$TITLE" > /dev/tty
         # Send body (d=1 means display now)
-        printf '\ePtmux;\e\e]99;i=%s:d=1:p=body;%s\e\e\\\e\\' "$NOTIF_ID" "$MESSAGE"
+        printf '\ePtmux;\e\e]99;i=%s:d=1:p=body;%s\e\e\\\e\\' "$NOTIF_ID" "$MESSAGE" > /dev/tty
     else
         # Direct OSC 99 escape sequences
         # Send title (d=0 means incomplete)
-        printf '\e]99;i=%s:d=0;%s\e\\' "$NOTIF_ID" "$TITLE"
+        printf '\e]99;i=%s:d=0;%s\e\\' "$NOTIF_ID" "$TITLE" > /dev/tty
         # Send body (d=1 means display now)
-        printf '\e]99;i=%s:d=1:p=body;%s\e\\' "$NOTIF_ID" "$MESSAGE"
+        printf '\e]99;i=%s:d=1:p=body;%s\e\\' "$NOTIF_ID" "$MESSAGE" > /dev/tty
     fi
 fi
 
