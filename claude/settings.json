@@ -18,9 +18,20 @@
             "command": "~/bin-personal/claude-notify.sh"
           }
         ]
-      },
+      }
+    ],
+    "UserPromptSubmit": [
       {
-        "matcher": "user_prompt_submit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/bin-personal/claude-notify-dismiss.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
         "hooks": [
           {
             "type": "command",

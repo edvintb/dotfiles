@@ -1,6 +1,11 @@
 #!/bin/bash
 # Dismiss Claude Code notifications using Kitty OSC 99 close action
 
+LOG_FILE="$HOME/.claude/logs/notifications.log"
+TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+
+echo "[$TIMESTAMP] [DISMISS_START] Script invoked" >> "$LOG_FILE"
+
 # Find the Claude Code process by walking up the process tree
 # This works whether hooks are run directly or via intermediate shell
 find_claude_pid() {
@@ -27,6 +32,9 @@ if [ -z "$TTY" ] || [ "$TTY" = "??" ]; then
     TTY=$(ps -p "$PPID" -o tty= 2>/dev/null | tr -d ' ')
 fi
 
+# Debug log
+echo "[$TIMESTAMP] [DISMISS_DEBUG] CLAUDE_PID=$CLAUDE_PID TTY=$TTY TMUX=${TMUX:-unset}" >> "$LOG_FILE"
+
 # Only proceed if we found a valid TTY
 if [ -n "$TTY" ] && [ "$TTY" != "??" ] && [ -e "/dev/$TTY" ]; then
     TTY_DEV="/dev/$TTY"
@@ -34,9 +42,11 @@ if [ -n "$TTY" ] && [ "$TTY" != "??" ] && [ -e "/dev/$TTY" ]; then
     if [ -n "$TMUX" ]; then
         # Wrap with tmux DCS passthrough
         printf '\ePtmux;\e\e]99;i=%s:p=close;\e\e\\\e\\' "$NOTIF_ID" > "$TTY_DEV"
+        echo "[$TIMESTAMP] [DISMISS] Sent tmux close to $TTY_DEV for $NOTIF_ID" >> "$LOG_FILE"
     else
         # Direct OSC 99 close
         printf '\e]99;i=%s:p=close;\e\\' "$NOTIF_ID" > "$TTY_DEV"
+        echo "[$TIMESTAMP] [DISMISS] Sent close to $TTY_DEV for $NOTIF_ID" >> "$LOG_FILE"
     fi
 fi
 
