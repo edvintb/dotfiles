@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/mnt/home/bin-personal/claude-notify.sh"
+            "command": "~/bin-personal/claude-notify.sh"
           }
         ]
       },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/mnt/home/bin-personal/claude-notify.sh"
+            "command": "~/bin-personal/claude-notify.sh"
           }
         ]
       },
@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/mnt/home/bin-personal/claude-notify-dismiss.sh"
+            "command": "~/bin-personal/claude-notify-dismiss.sh"
           }
         ]
       }

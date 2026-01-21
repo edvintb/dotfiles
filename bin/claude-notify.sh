@@ -32,10 +32,11 @@ fi
 echo "$CURRENT_TIME" > "$RATE_LIMIT_FILE"
 
 # Send notification using raw Kitty OSC 99 escape sequences
-# Write directly to /dev/tty to bypass Claude Code's output capture
+# Write to the actual TTY device (e.g., /dev/ttys011) since /dev/tty
+# isn't available to subprocesses on macOS
 # Format: \e]99;metadata;payload\e\\
 # Title has d=0 (incomplete), body has d=1 (display now)
-if [ -n "$MESSAGE" ] && [ -e /dev/tty ]; then
+if [ -n "$MESSAGE" ]; then
     # Get machine name
     MACHINE=$(hostname -s)
 
@@ -60,19 +61,32 @@ if [ -n "$MESSAGE" ] && [ -e /dev/tty ]; then
     CLAUDE_PID=$(find_claude_pid)
     NOTIF_ID="claude-$CLAUDE_PID"
 
-    # Check if we're inside tmux
-    if [ -n "$TMUX" ]; then
-        # Wrap with tmux DCS passthrough
-        # Send title (d=0 means incomplete, waiting for more)
-        printf '\ePtmux;\e\e]99;i=%s:d=0;%s\e\e\\\e\\' "$NOTIF_ID" "$TITLE" > /dev/tty
-        # Send body (d=1 means display now)
-        printf '\ePtmux;\e\e]99;i=%s:d=1:p=body;%s\e\e\\\e\\' "$NOTIF_ID" "$MESSAGE" > /dev/tty
-    else
-        # Direct OSC 99 escape sequences
-        # Send title (d=0 means incomplete)
-        printf '\e]99;i=%s:d=0;%s\e\\' "$NOTIF_ID" "$TITLE" > /dev/tty
-        # Send body (d=1 means display now)
-        printf '\e]99;i=%s:d=1:p=body;%s\e\\' "$NOTIF_ID" "$MESSAGE" > /dev/tty
+    # Find the actual TTY device from the Claude process
+    # On macOS, /dev/tty isn't available to subprocesses, so we need the real device
+    TTY=$(ps -p "$CLAUDE_PID" -o tty= 2>/dev/null | tr -d ' ')
+    if [ -z "$TTY" ] || [ "$TTY" = "??" ]; then
+        # Fallback: try to find TTY from parent
+        TTY=$(ps -p "$PPID" -o tty= 2>/dev/null | tr -d ' ')
+    fi
+
+    # Only proceed if we found a valid TTY
+    if [ -n "$TTY" ] && [ "$TTY" != "??" ] && [ -e "/dev/$TTY" ]; then
+        TTY_DEV="/dev/$TTY"
+
+        # Check if we're inside tmux
+        if [ -n "$TMUX" ]; then
+            # Wrap with tmux DCS passthrough
+            # Send title (d=0 means incomplete, waiting for more)
+            printf '\ePtmux;\e\e]99;i=%s:d=0;%s\e\e\\\e\\' "$NOTIF_ID" "$TITLE" > "$TTY_DEV"
+            # Send body (d=1 means display now)
+            printf '\ePtmux;\e\e]99;i=%s:d=1:p=body;%s\e\e\\\e\\' "$NOTIF_ID" "$MESSAGE" > "$TTY_DEV"
+        else
+            # Direct OSC 99 escape sequences
+            # Send title (d=0 means incomplete)
+            printf '\e]99;i=%s:d=0;%s\e\\' "$NOTIF_ID" "$TITLE" > "$TTY_DEV"
+            # Send body (d=1 means display now)
+            printf '\e]99;i=%s:d=1:p=body;%s\e\\' "$NOTIF_ID" "$MESSAGE" > "$TTY_DEV"
+        fi
     fi
 fi
 
