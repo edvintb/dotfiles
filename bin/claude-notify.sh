@@ -17,17 +17,47 @@ TYPE=$(echo "$INPUT" | grep -o '"notification_type":"[^"]*"' | sed 's/"notificat
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 echo "[$TIMESTAMP] [$TYPE] $MESSAGE" >> "$LOG_FILE"
 
-# Send notification via kitten notify
-# Uses Kitty's built-in notification system (OSC 99 protocol)
-# Works over SSH and displays on the local machine
+# Rate limiting: only send if last notification was >3 seconds ago
+RATE_LIMIT_FILE="$LOG_DIR/.last_notification"
+CURRENT_TIME=$(date +%s)
+if [ -f "$RATE_LIMIT_FILE" ]; then
+    LAST_TIME=$(cat "$RATE_LIMIT_FILE")
+    TIME_DIFF=$((CURRENT_TIME - LAST_TIME))
+    if [ "$TIME_DIFF" -lt 3 ]; then
+        # Too soon, skip notification but log it
+        echo "[$TIMESTAMP] [RATE_LIMITED] Skipped notification" >> "$LOG_FILE"
+        exit 0
+    fi
+fi
+echo "$CURRENT_TIME" > "$RATE_LIMIT_FILE"
+
+# Send notification using raw Kitty OSC 99 escape sequences
+# Format: \e]99;metadata;payload\e\\
+# Title has d=0 (incomplete), body has d=1 (display now)
 if [ -n "$MESSAGE" ]; then
-    # Use kitten notify to generate and send the notification
-    # --only-print-escape-code makes it work in non-interactive contexts
-    kitten notify --only-print-escape-code \
-        --app-name "Claude Code" \
-        --urgency normal \
-        "Claude Code - $TYPE" \
-        "$MESSAGE"
+    # Get machine name
+    MACHINE=$(hostname -s)
+
+    # Build title and body
+    TITLE="[$MACHINE] $TYPE"
+
+    # Use a notification ID based on process ID
+    NOTIF_ID="claude-$$"
+
+    # Check if we're inside tmux
+    if [ -n "$TMUX" ]; then
+        # Wrap with tmux DCS passthrough
+        # Send title (d=0 means incomplete, waiting for more)
+        printf '\ePtmux;\e\e]99;i=%s:d=0;%s\e\e\\\e\\' "$NOTIF_ID" "$TITLE"
+        # Send body (d=1 means display now)
+        printf '\ePtmux;\e\e]99;i=%s:d=1:p=body;%s\e\e\\\e\\' "$NOTIF_ID" "$MESSAGE"
+    else
+        # Direct OSC 99 escape sequences
+        # Send title (d=0 means incomplete)
+        printf '\e]99;i=%s:d=0;%s\e\\' "$NOTIF_ID" "$TITLE"
+        # Send body (d=1 means display now)
+        printf '\e]99;i=%s:d=1:p=body;%s\e\\' "$NOTIF_ID" "$MESSAGE"
+    fi
 fi
 
 exit 0
