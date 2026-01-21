@@ -18,6 +18,15 @@
             "command": "/mnt/home/bin-personal/claude-notify.sh"
           }
         ]
+      },
+      {
+        "matcher": "user_prompt_submit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/mnt/home/bin-personal/claude-notify-dismiss.sh"
+          }
+        ]
       }
     ]
   },

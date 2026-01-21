@@ -42,8 +42,23 @@ if [ -n "$MESSAGE" ] && [ -e /dev/tty ]; then
     # Build title and body
     TITLE="[$MACHINE] $TYPE"
 
-    # Use a notification ID based on process ID
-    NOTIF_ID="claude-$$"
+    # Find the Claude Code process by walking up the process tree
+    # This works whether hooks are run directly or via intermediate shell
+    find_claude_pid() {
+        local pid=$PPID
+        while [ "$pid" -gt 1 ]; do
+            local comm=$(ps -p "$pid" -o comm= 2>/dev/null)
+            if [ "$comm" = "claude" ]; then
+                echo "$pid"
+                return
+            fi
+            pid=$(ps -p "$pid" -o ppid= 2>/dev/null | tr -d ' ')
+        done
+        # Fallback to PPID if claude not found
+        echo "$PPID"
+    }
+    CLAUDE_PID=$(find_claude_pid)
+    NOTIF_ID="claude-$CLAUDE_PID"
 
     # Check if we're inside tmux
     if [ -n "$TMUX" ]; then
