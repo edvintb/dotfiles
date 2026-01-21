@@ -39,6 +39,16 @@
           }
         ]
       }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/bin-personal/claude-notify-dismiss.sh"
+          }
+        ]
+      }
     ]
   },
   "permissionMode": "default",
