@@ -113,11 +113,7 @@ uvl() {
   # 3. Create the necessary directories if they don't exist.
   mkdir -p "${venv_path}" "${cache_path}" 2>/dev/null
 
-  # 4. Set UV_PYTHON only if the venv already exists (for pip commands).
-  local uv_python=""
-  [[ -x "${venv_path}/bin/python" ]] && uv_python="${venv_path}/bin/python"
-
-  # 5. Execute the uv command with calculated environment variables.
+  # 4. Execute the uv command with calculated environment variables.
   #
   # We use a subshell (parentheses) to:
   # a) unset VIRTUAL_ENV to suppress the mismatch warning.
@@ -130,12 +126,14 @@ uvl() {
   #    wiped together when a new node is provisioned.
   (
     unset VIRTUAL_ENV
+    local old_uv_python="${UV_PYTHON:-}"
+    [[ -x "${venv_path}/bin/python" ]] && export UV_PYTHON="${venv_path}/bin/python"
     UV_PROJECT_ENVIRONMENT="${venv_path}" \
     UV_CACHE_DIR="${cache_path}" \
-    ${uv_python:+UV_PYTHON="${uv_python}"} \
     UV_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-}" \
     UV_LINK_MODE="symlink" \
     uv --preview-features extra-build-dependencies "$@"
+    [[ -n "${old_uv_python}" ]] && export UV_PYTHON="${old_uv_python}" || unset UV_PYTHON
   )
 }
 
