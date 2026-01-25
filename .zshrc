@@ -112,47 +112,40 @@ pwf() {
   echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 }
 
-uvl () {
-# 1. Extract the current directory name (no parent path)
-# Example: If PWD is /home/user/project_name, this extracts 'project_name'.
-local cur_dir=$(basename "$PWD")
+uvl() {
+  # 1. Extract the current directory name (no parent path)
+  # Example: If PWD is /home/user/project_name, this extracts 'project_name'.
+  local cur_dir=$(basename "$PWD")
 
-# 2. Define the absolute path for the virtual environment
-# e.g., /tmp/project_name/.venv
-# local venv_path="/tmp/${cur_dir}/.venv"
-#
-# # 3. Create the parent directory for the VENV if it doesn't exist.
-# # We suppress errors (2>/dev/null) in case the directory already exists.
-# mkdir -p "${venv_path}" 2>/dev/null
-#
-#
-# # 4. Execute the uv command with the calculated UV_PROJECT_ENVIRONMENT
-# # "$@" passes all arguments (sync, run, add, etc.) to the uv command.
-# UV_PROJECT_ENVIRONMENT="${venv_path}" uv --preview-features extra-build-dependencies "$@"
+  # 2. Define the absolute paths for the VENV and the CACHE
+  local venv_path="/tmp/uv-envs/${cur_dir}/.venv"
+  local cache_path="/tmp/.uv-cache"
 
-# 2. Define the absolute paths for the VENV and the CACHE
-local venv_path="/tmp/${cur_dir}/.venv"
-local cache_path="/tmp/.uv-cache"
+  echo -e "Using venv: \033[34m${venv_path}\033[0m and cache: \033[34m${cache_path}\033[0m"
 
-echo -e "Using venv: \033[34m${venv_path}\033[0m and cache: \033[34m${cache_path}\033[0m"
+  # 3. Create the necessary directories if they don't exist.
+  mkdir -p "${venv_path}" "${cache_path}" 2>/dev/null
 
-# 3. Create the necessary directories if they don't exist.
-mkdir -p "${venv_path}" "${cache_path}" 2>/dev/null
-
-# 4. Execute the uv command with calculated environment variables.
-#
-# We use a subshell (parentheses) to:
-# a) unset VIRTUAL_ENV to suppress the mismatch warning.
-# b) set UV_PROJECT_ENVIRONMENT (venv location).
-# c) set UV_CACHE_DIR (cache location in /tmp).
-# d) set UV_LINK_MODE=copy (to suppress the hardlink failure warning).
-(
+  # 4. Execute the uv command with calculated environment variables.
+  #
+  # We use a subshell (parentheses) to:
+  # a) unset VIRTUAL_ENV to suppress the mismatch warning.
+  # b) set UV_PROJECT_ENVIRONMENT (venv location).
+  # c) set UV_CACHE_DIR (cache location in /tmp).
+  # d) set UV_PYTHON for uv pip commands to use the correct venv.
+  # e) set UV_EXTRA_INDEX_URL to match PIP_EXTRA_INDEX_URL for private packages.
+  # f) set UV_LINK_MODE=symlink for faster installs. This is safe because both
+  #    the venv and cache are in /tmp on the same filesystem, and both get
+  #    wiped together when a new node is provisioned.
+  (
     unset VIRTUAL_ENV
     UV_PROJECT_ENVIRONMENT="${venv_path}" \
     UV_CACHE_DIR="${cache_path}" \
+    UV_PYTHON="${venv_path}/bin/python" \
+    UV_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-}" \
+    UV_LINK_MODE="symlink" \
     uv --preview-features extra-build-dependencies "$@"
-)
-
+  )
 }
 
 # reve aliases
