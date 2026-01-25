@@ -126,13 +126,17 @@ uvl() {
   # 3. Create the necessary directories if they don't exist.
   mkdir -p "${venv_path}" "${cache_path}" 2>/dev/null
 
-  # 4. Execute the uv command with calculated environment variables.
+  # 4. Set UV_PYTHON only if the venv already exists (for pip commands).
+  local uv_python=""
+  [[ -x "${venv_path}/bin/python" ]] && uv_python="${venv_path}/bin/python"
+
+  # 5. Execute the uv command with calculated environment variables.
   #
   # We use a subshell (parentheses) to:
   # a) unset VIRTUAL_ENV to suppress the mismatch warning.
   # b) set UV_PROJECT_ENVIRONMENT (venv location).
   # c) set UV_CACHE_DIR (cache location in /tmp).
-  # d) set UV_PYTHON for uv pip commands to use the correct venv.
+  # d) set UV_PYTHON for uv pip commands to use the correct venv (only if exists).
   # e) set UV_EXTRA_INDEX_URL to match PIP_EXTRA_INDEX_URL for private packages.
   # f) set UV_LINK_MODE=symlink for faster installs. This is safe because both
   #    the venv and cache are in /tmp on the same filesystem, and both get
@@ -141,7 +145,7 @@ uvl() {
     unset VIRTUAL_ENV
     UV_PROJECT_ENVIRONMENT="${venv_path}" \
     UV_CACHE_DIR="${cache_path}" \
-    UV_PYTHON="${venv_path}/bin/python" \
+    ${uv_python:+UV_PYTHON="${uv_python}"} \
     UV_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-}" \
     UV_LINK_MODE="symlink" \
     uv --preview-features extra-build-dependencies "$@"
