@@ -29,6 +29,7 @@ link() {
 link $HOME/.dotfiles/.zshrc $HOME/.zshrc
 link $HOME/.dotfiles/.bashrc $HOME/.bashrc
 link $HOME/.dotfiles/.gitconfig $HOME/.gitconfig
+link $HOME/.dotfiles/vimrc $HOME/.vimrc
 
 # claude
 mkdir -p $HOME/.claude

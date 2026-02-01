@@ -47,6 +47,19 @@
 TODO: give overview
 
 
+### `vim` Setup
+
+A basic vim configuration is included with sensible defaults. The `symlink.sh` script creates a symlink for `~/.vimrc`.
+
+**Features:**
+- Line numbers with relative numbering
+- Smart case-sensitive search
+- 4-space indentation
+- Mouse support
+- Tmux integration
+- Local customizations via `~/.vimrc_local`
+
+
 ### Alfred configuration
 
 1. Set Cmd+Space to be the key to open the alfred window
