@@ -16,8 +16,16 @@
 - Use `zoxide` instead of `cd` for smart directory navigation
 
 ## Guidelines
+- A queryfile is a sqlite file with a specific structure. Use QueryFileWriter
+  from ~/reve-training-data/common/queryfile.py when asked to write a queryfile.
+  This will make sure we use the right structure. You can read either using
+  sqlite3 cli or the QueryFileBackedList. After modifying or creating a .db
+  file, use the qu cli tool to make sure it satisifes the criteria to be a
+  queryfile.
 - Give up and try different search if file is not found within 15 seconds
 - All utilities installed in /mnt/home/.local/bin
+- Move all .db files to /tmp before running any linear-time SQL queries.
+  /mnt/data/ and /mnt/home interact poorly with sqlite.
 
 2. UV Package Manager
 

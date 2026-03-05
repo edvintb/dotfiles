@@ -88,6 +88,9 @@ vim.api.nvim_create_autocmd({"CursorHold", "CursorHoldI"}, {
     end,
 })
 
+-- Yank absolute path to system clipboard with <leader>p
+vim.keymap.set('n', '<leader>p', ":let @+=expand('%:p')<CR>", { desc = 'Copy absolute file path' })
+
 -- set the interval for CursorHold events (in milliseconds)
 -- this controls how often we check for file changes
 vim.opt.updatetime = 100
