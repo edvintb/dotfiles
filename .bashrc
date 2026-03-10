@@ -132,6 +132,8 @@ uvl() {
     UV_CACHE_DIR="${cache_path}" \
     UV_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-}" \
     UV_LINK_MODE="symlink" \
+    XDG_DATA_HOME="/tmp/.xdg-data" \
+    UV_CREDENTIALS_DIR="/tmp/.uv-credentials" \
     uv --preview-features extra-build-dependencies "$@"
     [[ -n "${old_uv_python}" ]] && export UV_PYTHON="${old_uv_python}" || unset UV_PYTHON
   )
