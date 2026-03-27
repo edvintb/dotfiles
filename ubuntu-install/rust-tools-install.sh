@@ -2,14 +2,14 @@
 
 # Install Rust-based performance tools as specified in CLAUDE.md
 # All binaries will be installed to $HOME/.local/bin
+# Installs run in parallel for speed on multi-core machines.
 
 set -e
 
 BIN_DIR="$HOME/.local/bin"
 mkdir -p "$BIN_DIR"
 
-echo "Installing Rust performance tools to $BIN_DIR"
-echo "This may take a while as each tool needs to be compiled..."
+echo "Installing Rust performance tools to $BIN_DIR (parallel)"
 echo ""
 
 # Check if cargo is available
@@ -19,70 +19,51 @@ if ! command -v cargo &> /dev/null; then
     exit 1
 fi
 
-# Function to install a cargo package
+LOG_DIR=$(mktemp -d)
+FAILED=0
+
 install_cargo_tool() {
     local package=$1
-    local binary=$2
-    echo "Installing $package..."
-    cargo install "$package" --root "$HOME/.local"
-    echo "✓ $package installed"
-    echo ""
+    local log="$LOG_DIR/$package.log"
+    if cargo install "$package" --root "$HOME/.local" > "$log" 2>&1; then
+        echo "✓ $package"
+    else
+        echo "✗ $package FAILED (see $log)"
+        FAILED=1
+    fi
 }
 
-# Core file/content search tools
-install_cargo_tool "fd-find" "fd"
-install_cargo_tool "ripgrep" "rg"
+# Launch all installs in parallel
+TOOLS=(
+    fd-find
+    ripgrep
+    bat
+    eza
+    sd
+    xcp
+    du-dust
+    bottom
+    procs
+    xh
+    tokei
+    hyperfine
+    zoxide
+)
 
-# File viewing and listing
-install_cargo_tool "bat" "bat"
-install_cargo_tool "eza" "eza"
+for tool in "${TOOLS[@]}"; do
+    install_cargo_tool "$tool" &
+done
 
-# Text replacement
-install_cargo_tool "sd" "sd"
-
-# File copying
-install_cargo_tool "xcp" "xcp"
-
-# Disk usage
-install_cargo_tool "du-dust" "dust"
-
-# Process/system monitoring
-install_cargo_tool "bottom" "btm"
-install_cargo_tool "procs" "procs"
-
-# HTTP client
-install_cargo_tool "xh" "xh"
-
-# Code statistics
-install_cargo_tool "tokei" "tokei"
-
-# Benchmarking
-install_cargo_tool "hyperfine" "hyperfine"
-
-# Smart directory navigation
-install_cargo_tool "zoxide" "zoxide"
+echo "Waiting for ${#TOOLS[@]} parallel cargo installs..."
+wait
 
 echo ""
-echo "================================================"
-echo "All tools installed successfully!"
-echo "================================================"
-echo ""
-echo "Installed tools:"
-echo "  fd       - Fast alternative to 'find'"
-echo "  rg       - Fast alternative to 'grep'"
-echo "  bat      - Cat with syntax highlighting"
-echo "  eza      - Modern alternative to 'ls'"
-echo "  sd       - Fast alternative to 'sed'"
-echo "  xcp      - Fast alternative to 'cp' with progress"
-echo "  dust     - Intuitive alternative to 'du'"
-echo "  btm      - Bottom - process/system monitor"
-echo "  procs    - Modern alternative to 'ps'"
-echo "  xh       - Fast alternative to 'curl'"
-echo "  tokei    - Count lines of code"
-echo "  hyperfine - Command-line benchmarking tool"
-echo "  zoxide   - Smarter cd command"
-echo ""
-echo "Note: zoxide requires additional setup in your shell config."
-echo "Add this to your .zshrc or .bashrc:"
-echo '  eval "$(zoxide init zsh)"  # for zsh'
-echo '  eval "$(zoxide init bash)" # for bash'
+if [ "$FAILED" -eq 0 ]; then
+    echo "================================================"
+    echo "All ${#TOOLS[@]} tools installed successfully!"
+    echo "================================================"
+else
+    echo "================================================"
+    echo "Some tools failed — check logs in $LOG_DIR"
+    echo "================================================"
+fi
