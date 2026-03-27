@@ -179,8 +179,10 @@ else
     echo ">>> Installing Rust toolchain..."
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
     export PATH="$HOME/.cargo/bin:$PATH"
-    echo "✓ Rust installed"
 fi
+# Ensure default toolchain is set
+rustup default stable 2>/dev/null || true
+echo "✓ Rust installed"
 
 echo ""
 echo ">>> Installing Rust CLI tools (this takes a while)..."
