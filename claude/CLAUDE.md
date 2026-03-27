@@ -30,16 +30,15 @@ This installs:
 - **Node.js**: via nvm (v22)
 - **GitHub CLI**: gh
 
-### What persists on /mnt/home vs what needs reinstalling
-- **Persists**: dotfiles, .netrc, .git-credentials, .ssh/, .local/bin (rust tools), .nvm/, .cargo/
-- **Per-pod** (needs apt-get each time): zsh, tmux, neovim, fzf, git-delta, build-essential, gh
-- **Per-pod** (from dotfiles symlinks): .bashrc, .config/*, bin-personal
-
-### Quick pod command prefix for tools
-If you just need basic tools on a throwaway pod without full setup:
-```bash
-apt-get update -qq && apt-get install -y -qq zsh tmux neovim fzf > /dev/null 2>&1 && source ~/.bashrc
-```
+### What persists on /mnt/home
+Everything installs to `~/.local` (`/mnt/home/.local`) so it persists across pods:
+- **~/.local/bin**: tmux, nvim, fzf, delta, gh (built from source or downloaded binaries)
+- **~/.local/bin**: Rust CLI tools (fd, rg, bat, eza, sd, etc.)
+- **~/.cargo/**: Rust toolchain
+- **~/.nvm/**: Node.js
+- **~/.netrc, ~/.git-credentials, ~/.ssh/**: Git/SSH credentials
+- **~/dotfiles/**: This repo (symlinked to ~/.dotfiles)
+- **Symlinks** (.bashrc, .config/*, bin-personal) point into /mnt/home/.dotfiles so they persist too
 
 ## 1. Preferred Rust Tools (Performance Replacements)
 
