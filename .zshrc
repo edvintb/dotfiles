@@ -133,8 +133,11 @@ uvl() {
 
   echo -e "Using venv: \033[34m${venv_path}\033[0m and cache: \033[34m${cache_path}\033[0m"
 
-  # 3. Create the necessary directories if they don't exist.
-  mkdir -p "${venv_path}" "${cache_path}" 2>/dev/null
+  # 3. Create the venv and cache dir if they don't exist.
+  mkdir -p "$(dirname "${venv_path}")" "${cache_path}" 2>/dev/null
+  if [[ ! -x "${venv_path}/bin/python" ]]; then
+    UV_CACHE_DIR="${cache_path}" UV_LINK_MODE="symlink" uv venv "${venv_path}"
+  fi
 
   # 4. Execute the uv command with calculated environment variables.
   #
@@ -148,7 +151,7 @@ uvl() {
   #    the venv and cache are in /tmp on the same filesystem, and both get
   #    wiped together when a new node is provisioned.
   (
-    unset VIRTUAL_ENV
+    export VIRTUAL_ENV="${venv_path}"
     local old_uv_python="${UV_PYTHON:-}"
     [[ -x "${venv_path}/bin/python" ]] && export UV_PYTHON="${venv_path}/bin/python"
     UV_PROJECT_ENVIRONMENT="${venv_path}" \
@@ -220,3 +223,4 @@ export PATH=$PATH:/usr/local/go/bin
 export PATH=$PATH:/mnt/home/go/bin
 
 . "$HOME/.local/bin/env"
+[ -f "$HOME/.ssh/agent.env" ] && source "$HOME/.ssh/agent.env"
