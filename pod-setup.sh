@@ -25,27 +25,134 @@ echo ""
 export PATH="$LOCAL_BIN:$HOME/.cargo/bin:$PATH"
 
 # -----------------------------------------------
-# 1. Build dependencies (ephemeral, needed for compilation)
+# 1. Kick off independent background work immediately
 # -----------------------------------------------
-echo ">>> Installing build dependencies..."
-apt-get update -qq
-apt-get install -y -qq \
-    curl \
-    build-essential \
-    cmake \
-    ninja-build \
-    gettext \
-    autoconf \
-    automake \
-    bison \
-    pkg-config \
-    libevent-dev \
-    ncurses-dev \
-    > /dev/null 2>&1
-echo "✓ Build dependencies installed"
+# These three groups have no dependencies on each other:
+#   - apt-get (needed by tmux/nvim builds later)
+#   - rustup (needed by rust-tools-install later)
+#   - binary downloads (fzf, delta, gh, claude, node) — fully independent
+# Running them concurrently saves ~60-90s vs the previous serial layout.
+
+echo ">>> Starting parallel installs (apt, rustup, binary downloads)..."
+
+# --- apt build dependencies (ephemeral, needed for tmux/nvim from source) ---
+(
+    apt-get update -qq
+    apt-get install -y -qq \
+        curl \
+        zsh \
+        build-essential \
+        cmake \
+        ninja-build \
+        gettext \
+        autoconf \
+        automake \
+        bison \
+        pkg-config \
+        libevent-dev \
+        ncurses-dev \
+        > /dev/null 2>&1
+    echo "✓ apt build dependencies installed"
+) &
+APT_PID=$!
+
+# --- Rust toolchain (needed before rust-tools-install) ---
+(
+    if command -v cargo &> /dev/null; then
+        echo "✓ rust (cached)"
+    else
+        if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path > /tmp/rustup-install.log 2>&1; then
+            echo "✓ rust toolchain installed"
+        else
+            echo "✗ rust toolchain install FAILED (see /tmp/rustup-install.log)"
+            exit 1
+        fi
+    fi
+    "$HOME/.cargo/bin/rustup" default stable 2>/dev/null || true
+) &
+RUST_PID=$!
+
+# --- fzf binary ---
+(
+    if [ -x "$LOCAL_BIN/fzf" ]; then
+        echo "✓ fzf (cached)"
+    else
+        FZF_VERSION=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
+        curl -fsSL "https://github.com/junegunn/fzf/releases/download/v${FZF_VERSION}/fzf-${FZF_VERSION}-linux_amd64.tar.gz" | tar xz -C "$LOCAL_BIN"
+        echo "✓ fzf downloaded"
+    fi
+) &
+
+# --- delta binary ---
+(
+    if [ -x "$LOCAL_BIN/delta" ]; then
+        echo "✓ delta (cached)"
+    else
+        DELTA_VERSION=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | grep tag_name | cut -d '"' -f 4)
+        curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu.tar.gz" | tar xz -C /tmp
+        cp "/tmp/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu/delta" "$LOCAL_BIN/"
+        rm -rf "/tmp/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu"
+        echo "✓ delta downloaded"
+    fi
+) &
+
+# --- gh binary ---
+(
+    if [ -x "$LOCAL_BIN/gh" ]; then
+        echo "✓ gh (cached)"
+    else
+        GH_VERSION=$(curl -s https://api.github.com/repos/cli/cli/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
+        curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" | tar xz -C /tmp
+        cp "/tmp/gh_${GH_VERSION}_linux_amd64/bin/gh" "$LOCAL_BIN/"
+        rm -rf "/tmp/gh_${GH_VERSION}_linux_amd64"
+        echo "✓ gh downloaded"
+    fi
+) &
+
+# --- Claude Code (native installer, standalone binary into ~/.local/bin) ---
+(
+    if [ -x "$LOCAL_BIN/claude" ]; then
+        echo "✓ claude code (cached)"
+    else
+        curl -fsSL https://claude.ai/install.sh | bash > /dev/null 2>&1
+        echo "✓ claude code installed"
+    fi
+) &
+
+# --- oh-my-zsh (.zshrc sources $ZSH/oh-my-zsh.sh) ---
+(
+    if [ -d "$HOME/.oh-my-zsh" ]; then
+        echo "✓ oh-my-zsh (cached)"
+    else
+        RUNZSH=no CHSH=no KEEP_ZSHRC=yes \
+            sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" \
+            "" --unattended > /dev/null 2>&1
+        echo "✓ oh-my-zsh installed"
+    fi
+) &
+
+# --- uv (Astral) — creates ~/.local/bin/env which .zshrc sources ---
+(
+    if [ -x "$LOCAL_BIN/uv" ]; then
+        echo "✓ uv (cached)"
+    else
+        curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="$LOCAL_BIN" sh > /dev/null 2>&1
+        echo "✓ uv installed"
+    fi
+) &
+
+# --- Node.js via nvm ---
+(
+    if [ -d "$HOME/.nvm/versions/node" ] && ls "$HOME/.nvm/versions/node/" &>/dev/null; then
+        echo "✓ node (cached)"
+    else
+        bash "$DOTFILES_DIR/ubuntu-install/node-install.sh" > /dev/null 2>&1
+        echo "✓ node installed via nvm"
+    fi
+) &
 
 # -----------------------------------------------
-# 2. Symlink dotfiles
+# 2. Symlink dotfiles (runs while background work proceeds)
 # -----------------------------------------------
 echo ""
 echo ">>> Setting up dotfiles symlinks..."
@@ -90,106 +197,62 @@ link "$HOME/.dotfiles/tmux/tmux.conf" "$HOME/.tmux.conf"
 echo "✓ Dotfiles linked"
 
 # -----------------------------------------------
-# 3. Install Rust toolchain (needed before parallel Rust tools)
+# 3. Launch dependent builds as soon as their prerequisites finish
 # -----------------------------------------------
+# tmux + neovim need apt (build-essential, cmake, ninja, etc.)
+# rust-tools-install needs cargo from rustup
+# We block on each prerequisite individually rather than a global `wait`,
+# so each dependent step starts the moment it can.
 echo ""
-if command -v cargo &> /dev/null; then
-    echo ">>> Rust already installed, skipping rustup"
-else
-    echo ">>> Installing Rust toolchain..."
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
+echo ">>> Waiting on prerequisites to launch dependent builds..."
+
+# Once apt is done, fan out tmux + nvim builds in the background.
+(
+    wait $APT_PID
+
+    # --- tmux from source ---
+    (
+        if [ -x "$LOCAL_BIN/tmux" ]; then
+            echo "✓ tmux (cached)"
+        else
+            cd /tmp && rm -rf tmux-build
+            git clone --depth 1 https://github.com/tmux/tmux.git tmux-build 2>/dev/null
+            cd tmux-build && sh autogen.sh > /dev/null 2>&1
+            ./configure --prefix="$PREFIX" > /dev/null 2>&1
+            make -j$(nproc) > /dev/null 2>&1 && make install > /dev/null 2>&1
+            rm -rf /tmp/tmux-build
+            echo "✓ tmux built from source"
+        fi
+    ) &
+
+    # --- neovim from source ---
+    (
+        if [ -x "$LOCAL_BIN/nvim" ]; then
+            echo "✓ neovim (cached)"
+        else
+            cd /tmp && rm -rf neovim-build
+            git clone --depth 1 --branch stable https://github.com/neovim/neovim.git neovim-build 2>/dev/null
+            cd neovim-build
+            make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX="$PREFIX" -j$(nproc) > /dev/null 2>&1
+            make install > /dev/null 2>&1
+            rm -rf /tmp/neovim-build
+            echo "✓ neovim built from source"
+        fi
+    ) &
+
+    wait
+) &
+BUILDS_PID=$!
+
+# Once rustup is done, kick off rust-tools-install (internally parallel).
+(
+    wait $RUST_PID
     export PATH="$HOME/.cargo/bin:$PATH"
-fi
-rustup default stable 2>/dev/null || true
-echo "✓ Rust installed"
-
-# -----------------------------------------------
-# 4. Parallel installs: builds, downloads, and cargo tools all at once
-# -----------------------------------------------
-echo ""
-echo ">>> Launching parallel installs (tmux, nvim, fzf, delta, gh, node, 13 rust tools)..."
-
-# --- tmux from source ---
-(
-    if [ -x "$LOCAL_BIN/tmux" ]; then
-        echo "✓ tmux (cached)"
-    else
-        cd /tmp && rm -rf tmux-build
-        git clone --depth 1 https://github.com/tmux/tmux.git tmux-build 2>/dev/null
-        cd tmux-build && sh autogen.sh > /dev/null 2>&1
-        ./configure --prefix="$PREFIX" > /dev/null 2>&1
-        make -j$(nproc) > /dev/null 2>&1 && make install > /dev/null 2>&1
-        rm -rf /tmp/tmux-build
-        echo "✓ tmux built from source"
-    fi
+    bash "$DOTFILES_DIR/ubuntu-install/rust-tools-install.sh"
 ) &
+RUST_TOOLS_PID=$!
 
-# --- neovim from source ---
-(
-    if [ -x "$LOCAL_BIN/nvim" ]; then
-        echo "✓ neovim (cached)"
-    else
-        cd /tmp && rm -rf neovim-build
-        git clone --depth 1 --branch stable https://github.com/neovim/neovim.git neovim-build 2>/dev/null
-        cd neovim-build
-        make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX="$PREFIX" -j$(nproc) > /dev/null 2>&1
-        make install > /dev/null 2>&1
-        rm -rf /tmp/neovim-build
-        echo "✓ neovim built from source"
-    fi
-) &
-
-# --- fzf binary ---
-(
-    if [ -x "$LOCAL_BIN/fzf" ]; then
-        echo "✓ fzf (cached)"
-    else
-        FZF_VERSION=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
-        curl -fsSL "https://github.com/junegunn/fzf/releases/download/v${FZF_VERSION}/fzf-${FZF_VERSION}-linux_amd64.tar.gz" | tar xz -C "$LOCAL_BIN"
-        echo "✓ fzf downloaded"
-    fi
-) &
-
-# --- delta binary ---
-(
-    if [ -x "$LOCAL_BIN/delta" ]; then
-        echo "✓ delta (cached)"
-    else
-        DELTA_VERSION=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | grep tag_name | cut -d '"' -f 4)
-        curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu.tar.gz" | tar xz -C /tmp
-        cp "/tmp/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu/delta" "$LOCAL_BIN/"
-        rm -rf "/tmp/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu"
-        echo "✓ delta downloaded"
-    fi
-) &
-
-# --- gh binary ---
-(
-    if [ -x "$LOCAL_BIN/gh" ]; then
-        echo "✓ gh (cached)"
-    else
-        GH_VERSION=$(curl -s https://api.github.com/repos/cli/cli/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
-        curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" | tar xz -C /tmp
-        cp "/tmp/gh_${GH_VERSION}_linux_amd64/bin/gh" "$LOCAL_BIN/"
-        rm -rf "/tmp/gh_${GH_VERSION}_linux_amd64"
-        echo "✓ gh downloaded"
-    fi
-) &
-
-# --- Node.js via nvm ---
-(
-    if [ -d "$HOME/.nvm/versions/node" ] && ls "$HOME/.nvm/versions/node/" &>/dev/null; then
-        echo "✓ node (cached)"
-    else
-        bash "$DOTFILES_DIR/ubuntu-install/node-install.sh" > /dev/null 2>&1
-        echo "✓ node installed via nvm"
-    fi
-) &
-
-# --- All 13 Rust CLI tools (internally parallel too) ---
-bash "$DOTFILES_DIR/ubuntu-install/rust-tools-install.sh" &
-
-# Wait for everything
+# Wait for everything (initial bg downloads + dependent builds + rust tools)
 wait
 echo "✓ All parallel installs complete"
 
@@ -227,6 +290,12 @@ check "neovim" "nvim"
 check "fzf" "fzf"
 check "delta" "delta"
 check "gh" "gh"
+check "claude code" "claude"
+check "uv" "uv"
+check "zsh" "zsh"
+[ -d "$HOME/.oh-my-zsh" ] && echo "  ✓ oh-my-zsh" || echo "  ✗ oh-my-zsh: NOT FOUND"
+[ -f "$HOME/.cargo/env" ] && echo "  ✓ ~/.cargo/env" || echo "  ✗ ~/.cargo/env: NOT FOUND"
+[ -f "$LOCAL_BIN/env" ] && echo "  ✓ ~/.local/bin/env" || echo "  ✗ ~/.local/bin/env: NOT FOUND"
 check "cargo" "cargo"
 check "fd" "fd"
 check "ripgrep" "rg"
