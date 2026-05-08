@@ -221,56 +221,49 @@ echo "✓ Dotfiles linked"
 # -----------------------------------------------
 # tmux + neovim need apt (build-essential, cmake, ninja, etc.)
 # rust-tools-install needs cargo from rustup
-# We block on each prerequisite individually rather than a global `wait`,
-# so each dependent step starts the moment it can.
+# `wait $PID` only works on direct children of the current shell, so we
+# block in the main shell rather than nested subshells. The other parallel
+# downloads keep running concurrently while we wait here.
 echo ""
 echo ">>> Waiting on prerequisites to launch dependent builds..."
 
 # Once apt is done, fan out tmux + nvim builds in the background.
+wait $APT_PID
+
+# --- tmux from source ---
 (
-    wait $APT_PID
-
-    # --- tmux from source ---
-    (
-        if [ -x "$LOCAL_BIN/tmux" ]; then
-            echo "✓ tmux (cached)"
-        else
-            cd /tmp && rm -rf tmux-build
-            git clone --depth 1 https://github.com/tmux/tmux.git tmux-build 2>/dev/null
-            cd tmux-build && sh autogen.sh > /dev/null 2>&1
-            ./configure --prefix="$PREFIX" > /dev/null 2>&1
-            make -j$(nproc) > /dev/null 2>&1 && make install > /dev/null 2>&1
-            rm -rf /tmp/tmux-build
-            echo "✓ tmux built from source"
-        fi
-    ) &
-
-    # --- neovim from source ---
-    (
-        if [ -x "$LOCAL_BIN/nvim" ]; then
-            echo "✓ neovim (cached)"
-        else
-            cd /tmp && rm -rf neovim-build
-            git clone --depth 1 --branch stable https://github.com/neovim/neovim.git neovim-build 2>/dev/null
-            cd neovim-build
-            make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX="$PREFIX" -j$(nproc) > /dev/null 2>&1
-            make install > /dev/null 2>&1
-            rm -rf /tmp/neovim-build
-            echo "✓ neovim built from source"
-        fi
-    ) &
-
-    wait
+    if [ -x "$LOCAL_BIN/tmux" ]; then
+        echo "✓ tmux (cached)"
+    else
+        cd /tmp && rm -rf tmux-build
+        git clone --depth 1 https://github.com/tmux/tmux.git tmux-build 2>/dev/null
+        cd tmux-build && sh autogen.sh > /dev/null 2>&1
+        ./configure --prefix="$PREFIX" > /dev/null 2>&1
+        make -j$(nproc) > /dev/null 2>&1 && make install > /dev/null 2>&1
+        rm -rf /tmp/tmux-build
+        echo "✓ tmux built from source"
+    fi
 ) &
-BUILDS_PID=$!
+
+# --- neovim from source ---
+(
+    if [ -x "$LOCAL_BIN/nvim" ]; then
+        echo "✓ neovim (cached)"
+    else
+        cd /tmp && rm -rf neovim-build
+        git clone --depth 1 --branch stable https://github.com/neovim/neovim.git neovim-build 2>/dev/null
+        cd neovim-build
+        make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX="$PREFIX" -j$(nproc) > /dev/null 2>&1
+        make install > /dev/null 2>&1
+        rm -rf /tmp/neovim-build
+        echo "✓ neovim built from source"
+    fi
+) &
 
 # Once rustup is done, kick off rust-tools-install (internally parallel).
-(
-    wait $RUST_PID
-    export PATH="$HOME/.cargo/bin:$PATH"
-    bash "$DOTFILES_DIR/ubuntu-install/rust-tools-install.sh"
-) &
-RUST_TOOLS_PID=$!
+wait $RUST_PID
+export PATH="$HOME/.cargo/bin:$PATH"
+bash "$DOTFILES_DIR/ubuntu-install/rust-tools-install.sh" &
 
 # Wait for everything (initial bg downloads + dependent builds + rust tools)
 wait
