@@ -1,57 +1,30 @@
 {
-  "model": "opus",
+  "model": "opus[1m]",
   "hooks": {
-    "Notification": [
-      {
-        "matcher": "permission_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/bin-personal/claude-notify.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "idle_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/bin-personal/claude-notify.sh"
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
+    "SessionStart": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "~/bin-personal/claude-notify-dismiss.sh"
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/bin-personal/claude-notify-dismiss.sh"
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/bin-personal/claude-notify-dismiss.sh"
+            "command": "/Users/edvintb/gkr/src/gkr/_plugin_data/gkr-plugin/hooks-handlers/session-start.sh"
           }
         ]
       }
     ]
   },
+  "enabledPlugins": {
+    "reve@reve-marketplace": true,
+    "swift-lsp@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "reve-marketplace": {
+      "source": {
+        "source": "directory",
+        "path": "/Users/edvintb/gkr/src/gkr/_plugin_data"
+      }
+    }
+  },
+  "effortLevel": "medium",
   "permissionMode": "default",
   "vimMode": true,
   "allowedPrompts": [
@@ -107,6 +80,5 @@
       "tool": "Bash",
       "prompt": "run linters and formatters"
     }
-  ],
-  "effortLevel": "medium"
+  ]
 }
