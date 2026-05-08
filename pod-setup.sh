@@ -58,7 +58,7 @@ APT_PID=$!
 
 # --- Rust toolchain (needed before rust-tools-install) ---
 (
-    if command -v cargo &> /dev/null; then
+    if command -v cargo &> /dev/null && [ -f "$HOME/.cargo/env" ]; then
         echo "✓ rust (cached)"
     else
         if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path > /tmp/rustup-install.log 2>&1; then
@@ -119,7 +119,7 @@ RUST_PID=$!
     fi
 ) &
 
-# --- oh-my-zsh (.zshrc sources $ZSH/oh-my-zsh.sh) ---
+# --- oh-my-zsh + plugins (.zshrc loads zsh-syntax-highlighting, zsh-autosuggestions) ---
 (
     if [ -d "$HOME/.oh-my-zsh" ]; then
         echo "✓ oh-my-zsh (cached)"
@@ -129,14 +129,34 @@ RUST_PID=$!
             "" --unattended > /dev/null 2>&1
         echo "✓ oh-my-zsh installed"
     fi
+    OMZ_CUSTOM="$HOME/.oh-my-zsh/custom/plugins"
+    mkdir -p "$OMZ_CUSTOM"
+    [ -d "$OMZ_CUSTOM/zsh-syntax-highlighting" ] || \
+        git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git \
+            "$OMZ_CUSTOM/zsh-syntax-highlighting" > /dev/null 2>&1
+    [ -d "$OMZ_CUSTOM/zsh-autosuggestions" ] || \
+        git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git \
+            "$OMZ_CUSTOM/zsh-autosuggestions" > /dev/null 2>&1
+    echo "✓ zsh plugins (syntax-highlighting, autosuggestions)"
 ) &
 
 # --- uv (Astral) — creates ~/.local/bin/env which .zshrc sources ---
 (
-    if [ -x "$LOCAL_BIN/uv" ]; then
+    if [ -x "$LOCAL_BIN/uv" ] && [ -f "$LOCAL_BIN/env" ]; then
         echo "✓ uv (cached)"
     else
-        curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="$LOCAL_BIN" sh > /dev/null 2>&1
+        curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="$LOCAL_BIN" sh > /tmp/uv-install.log 2>&1
+        # Fallback: if the installer didn't write env (some uv versions skip it),
+        # generate a minimal one so .zshrc's `. "$HOME/.local/bin/env"` works.
+        if [ ! -f "$LOCAL_BIN/env" ]; then
+            cat > "$LOCAL_BIN/env" <<'ENVEOF'
+#!/bin/sh
+case ":${PATH}:" in
+    *:"$HOME/.local/bin":*) ;;
+    *) export PATH="$HOME/.local/bin:$PATH" ;;
+esac
+ENVEOF
+        fi
         echo "✓ uv installed"
     fi
 ) &
