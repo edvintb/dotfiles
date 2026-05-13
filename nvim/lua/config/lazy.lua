@@ -99,34 +99,26 @@ require("lazy").setup({
             delay = 300,  -- disable showing marks instantly
         }
     },
+    -- lsp
+    { 'neovim/nvim-lspconfig' },
     {
-        'VonHeikemen/lsp-zero.nvim',
-        branch = 'v2.x',
-        dependencies = {
-            -- lsp
-            {
-                'neovim/nvim-lspconfig'  -- Required
-            },
-            {                                      -- Optional
-                'williamboman/mason.nvim',
-                build = function()
-                    pcall(vim.cmd, 'MasonUpdate')
-                end,
-            },
-            {'williamboman/mason-lspconfig.nvim'}, -- Optional
-            -- autocomplete
-            {'hrsh7th/nvim-cmp'},     -- Required
-            {'hrsh7th/cmp-nvim-lsp'}, -- Required
-            {'L3MON4D3/LuaSnip'},     -- Required
-            { 'hrsh7th/cmp-buffer' },
-            { 'hrsh7th/cmp-path' },
-            { 'hrsh7th/cmp-vsnip' },
-            { 'hrsh7th/vim-vsnip' },
-            { 'hrsh7th/cmp-nvim-lsp-signature-help' },
-            { 'saadparwaiz1/cmp_luasnip' },
-            { "rafamadriz/friendly-snippets" }
-        }
+        'williamboman/mason.nvim',
+        build = function()
+            pcall(vim.cmd, 'MasonUpdate')
+        end,
     },
+    { 'williamboman/mason-lspconfig.nvim' },
+    -- autocomplete
+    { 'hrsh7th/nvim-cmp' },
+    { 'hrsh7th/cmp-nvim-lsp' },
+    { 'L3MON4D3/LuaSnip' },
+    { 'hrsh7th/cmp-buffer' },
+    { 'hrsh7th/cmp-path' },
+    { 'hrsh7th/cmp-vsnip' },
+    { 'hrsh7th/vim-vsnip' },
+    { 'hrsh7th/cmp-nvim-lsp-signature-help' },
+    { 'saadparwaiz1/cmp_luasnip' },
+    { 'rafamadriz/friendly-snippets' },
     -- language-specific plugins
     { 'mfussenegger/nvim-jdtls' },
     -- { 'simrat39/rust-tools.nvim' },
@@ -141,6 +133,17 @@ require("lazy").setup({
     { 'lervag/vimtex' },
 
     { 'eandrju/cellular-automaton.nvim' },
+
+    {
+        "knownasnaffy/himalaya.nvim",
+        dependencies = { "MunifTanjim/nui.nvim" },
+        opts = {
+            icons_enabled = true,
+        },
+        keys = {
+            { '<leader>oh', '<Cmd>Himalaya<CR>', desc = '[O]pen [H]imalaya' },
+        },
+    },
 
     {
         "epwalsh/obsidian.nvim",

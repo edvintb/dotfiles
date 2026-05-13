@@ -2,11 +2,9 @@
 vim.opt.completeopt = { 'menuone', 'noselect', 'noinsert', 'preview' }
 vim.opt.shortmess = vim.opt.shortmess + { c = true }
 
-local lsp = require('lsp-zero')
 local cmp = require('cmp')
-local cmp_action = lsp.cmp_action()
+local luasnip = require('luasnip')
 
--- https://github.com/VonHeikemen/lsp-zero.nvim/blob/v2.x/doc/md/autocomplete.md#introduction
 -- TODO: show suggestions when instantiating a class or calling a function
 cmp.setup({
     mapping = {
@@ -29,8 +27,8 @@ cmp.setup({
         ['<C-e>'] = cmp.mapping.abort(),
         ['<C-u>'] = cmp.mapping.scroll_docs(-4),
         ['<C-d>'] = cmp.mapping.scroll_docs(4),
-        ['<C-n>'] = cmp_action.luasnip_jump_forward(),
-        ['<C-p>'] = cmp_action.luasnip_jump_backward(),
+        ['<C-n>'] = cmp.mapping(function() luasnip.jump(1) end, { 'i', 's' }),
+        ['<C-p>'] = cmp.mapping(function() luasnip.jump(-1) end, { 'i', 's' }),
     },
 
     -- TODO: order the sources such that lsp comes first in the suggestions (currently doesn't always)
