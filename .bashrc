@@ -99,45 +99,7 @@ pwf() {
 }
 
 # UV wrapper with local venv and cache
-uvl() {
-  # 1. Extract the current directory name (no parent path)
-  # Example: If PWD is /home/user/project_name, this extracts 'project_name'.
-  local cur_dir=$(basename "$PWD")
-
-  # 2. Define the absolute paths for the VENV and the CACHE
-  local venv_path="/tmp/uv-envs/${cur_dir}/.venv"
-  local cache_path="/tmp/.uv-cache"
-
-  echo -e "Using venv: \033[34m${venv_path}\033[0m and cache: \033[34m${cache_path}\033[0m"
-
-  # 3. Create the necessary directories if they don't exist.
-  mkdir -p "${venv_path}" "${cache_path}" 2>/dev/null
-
-  # 4. Execute the uv command with calculated environment variables.
-  #
-  # We use a subshell (parentheses) to:
-  # a) unset VIRTUAL_ENV to suppress the mismatch warning.
-  # b) set UV_PROJECT_ENVIRONMENT (venv location).
-  # c) set UV_CACHE_DIR (cache location in /tmp).
-  # d) set UV_PYTHON for uv pip commands to use the correct venv (only if exists).
-  # e) set UV_EXTRA_INDEX_URL to match PIP_EXTRA_INDEX_URL for private packages.
-  # f) set UV_LINK_MODE=symlink for faster installs. This is safe because both
-  #    the venv and cache are in /tmp on the same filesystem, and both get
-  #    wiped together when a new node is provisioned.
-  (
-    unset VIRTUAL_ENV
-    local old_uv_python="${UV_PYTHON:-}"
-    [[ -x "${venv_path}/bin/python" ]] && export UV_PYTHON="${venv_path}/bin/python"
-    UV_PROJECT_ENVIRONMENT="${venv_path}" \
-    UV_CACHE_DIR="${cache_path}" \
-    UV_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-}" \
-    UV_LINK_MODE="symlink" \
-    XDG_DATA_HOME="/tmp/.xdg-data" \
-    UV_CREDENTIALS_DIR="/tmp/.uv-credentials" \
-    uv --preview-features extra-build-dependencies "$@"
-    [[ -n "${old_uv_python}" ]] && export UV_PYTHON="${old_uv_python}" || unset UV_PYTHON
-  )
-}
+# uvl is a standalone script at ~/.local/bin/uvl
 
 # Source secrets if available
 BASHRC_SECRETS=~/.dotfiles/.bash_secrets
@@ -150,3 +112,4 @@ BASHRC_PRIVATE=~/.dotfiles/bashrc_private
 if [[ -f $BASHRC_PRIVATE ]]; then
     source $BASHRC_PRIVATE
 fi
+[ -f "$HOME/.ssh/agent.env" ] && source "$HOME/.ssh/agent.env"
