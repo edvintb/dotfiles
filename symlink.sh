@@ -17,8 +17,9 @@ link() {
             rm "$dst"
         fi
     elif [[ -e $dst ]]; then
-        echo "⚠ Warning: $dst exists but is not a symlink. Skipping."
-        return 1
+        local backup="${dst}.backup"
+        echo "⟳ Backing up existing: $dst -> $backup"
+        mv "$dst" "$backup"
     fi
 
     ln -s "$src" "$dst"

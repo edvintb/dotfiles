@@ -210,7 +210,6 @@
     "ask": [],
     "defaultMode": "auto"
   },
-  "model": "sonnet[1m]",
   "hooks": {
     "SessionStart": [
       {
@@ -234,7 +233,6 @@
       }
     }
   },
-  "effortLevel": "medium",
   "preferredNotifChannel": "kitty",
   "skipAutoPermissionPrompt": true,
   "permissionMode": "default",
