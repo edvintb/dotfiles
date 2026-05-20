@@ -37,6 +37,9 @@ plugins=(
 fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src  # required for zsh-completions
 source $ZSH/oh-my-zsh.sh
 
+# Suppress user@host in agnoster prompt (always shown over SSH otherwise)
+prompt_context() {}
+
 # User configuration
 # Prioritize local binaries first (custom builds of tmux, nvim, etc.)
 # Note: Order matters! Build PATH in priority order
