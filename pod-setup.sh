@@ -1,23 +1,26 @@
 #!/usr/bin/env bash
-# pod-setup.sh — Full environment setup for GKR pods (megatron/brainatron/trainatron)
-# Run this once on a new cluster to set up /mnt/home with all tools and configs.
-# Usage: gkr s pod-setup -p 1 -g 0 -C m --cmd "bash /mnt/home/dotfiles/pod-setup.sh"
-#
-# Everything installs to /mnt/home/.local so it persists across pods.
-# Only build dependencies (apt) are ephemeral and needed per-pod.
+# pod-setup.sh — Full environment setup for local machines and VMs
+# Installs oh-my-zsh, plugins, tools, and creates dotfiles symlinks
 #
 # Prerequisites:
-#   - /mnt/home/dotfiles must be cloned (git clone https://github.com/edvintb/dotfiles.git /mnt/home/dotfiles)
+#   - ~/.dotfiles must exist (this directory or a symlink to dotfiles repo)
 #   - Git credentials must be set up (~/.netrc or ~/.git-credentials)
 
 set -e
 
-DOTFILES_DIR="/mnt/home/dotfiles"
+DOTFILES_DIR="$HOME/.dotfiles"
 PREFIX="$HOME/.local"
 LOCAL_BIN="$PREFIX/bin"
 
+# Check if sudo is available and use it for apt-get
+if command -v sudo &> /dev/null && sudo -n true 2>/dev/null; then
+    SUDO="sudo"
+else
+    SUDO=""
+fi
+
 echo "============================================"
-echo "  GKR Pod Environment Setup"
+echo "  Development Environment Setup"
 echo "  Installing to: $PREFIX"
 echo "============================================"
 echo ""
@@ -37,8 +40,8 @@ echo ">>> Starting parallel installs (apt, rustup, binary downloads)..."
 
 # --- apt build dependencies (ephemeral, needed for tmux/nvim from source) ---
 (
-    apt-get update -qq
-    apt-get install -y -qq \
+    $SUDO apt-get update -qq
+    $SUDO apt-get install -y -qq \
         curl \
         zsh \
         build-essential \
@@ -166,7 +169,9 @@ ENVEOF
     if [ -d "$HOME/.nvm/versions/node" ] && ls "$HOME/.nvm/versions/node/" &>/dev/null; then
         echo "✓ node (cached)"
     else
-        bash "$DOTFILES_DIR/ubuntu-install/node-install.sh" > /dev/null 2>&1
+        if [ -f "$DOTFILES_DIR/ubuntu-install/node-install.sh" ]; then
+            bash "$DOTFILES_DIR/ubuntu-install/node-install.sh" > /dev/null 2>&1
+        fi
         echo "✓ node installed via nvm"
     fi
 ) &
@@ -263,7 +268,9 @@ wait $APT_PID
 # Once rustup is done, kick off rust-tools-install (internally parallel).
 wait $RUST_PID
 export PATH="$HOME/.cargo/bin:$PATH"
-bash "$DOTFILES_DIR/ubuntu-install/rust-tools-install.sh" &
+if [ -f "$DOTFILES_DIR/ubuntu-install/rust-tools-install.sh" ]; then
+    bash "$DOTFILES_DIR/ubuntu-install/rust-tools-install.sh" &
+fi
 
 # Wait for everything (initial bg downloads + dependent builds + rust tools)
 wait
@@ -325,5 +332,5 @@ echo "============================================"
 echo "  Setup complete!"
 echo "============================================"
 echo ""
-echo "Everything installed to $PREFIX (persists on /mnt/home)."
-echo "Source ~/.bashrc to get the full environment."
+echo "Everything installed to $PREFIX."
+echo "Source ~/.zshrc to get the full environment: exec zsh"
