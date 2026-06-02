@@ -7,9 +7,9 @@ if [ -n "$ZSH_VERSION" ]; then
 else
     _rc_file="${BASH_SOURCE[0]}"
 fi
-# Resolve symlinks (readlink -f not available on macOS, use cd -P instead)
+# Resolve symlinks using readlink
 if [ -L "$_rc_file" ]; then
-    _rc_file="$(cd "$(dirname "$_rc_file")" && pwd -P)/$(basename "$_rc_file")"
+    _rc_file="$(readlink "$_rc_file")"
 fi
 DOTFILES="$(cd "$(dirname "$_rc_file")" && pwd)"
 unset _rc_file
