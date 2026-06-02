@@ -1,6 +1,11 @@
 # Dotfiles initialization — sourced by ~/.zshrc and ~/.bashrc
 
-# SSH agent: ~/.ssh/rc updates the symlink on each connection, shell uses it
+# SSH agent forwarding: maintain stable symlink to current socket
+if [ -n "$SSH_AUTH_SOCK" ] && [ "$SSH_AUTH_SOCK" != "$HOME/.ssh/ssh_auth_sock" ]; then
+    old_target=$(readlink "$HOME/.ssh/ssh_auth_sock" 2>/dev/null)
+    ln -sf "$SSH_AUTH_SOCK" "$HOME/.ssh/ssh_auth_sock"
+    echo "[init.sh] SSH socket: $old_target -> $SSH_AUTH_SOCK" >&2
+fi
 export SSH_AUTH_SOCK="$HOME/.ssh/ssh_auth_sock"
 
 # Source user secrets if they exist
