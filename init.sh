@@ -1,29 +1,7 @@
 # Dotfiles initialization — sourced by ~/.zshrc and ~/.bashrc
-# Auto-detects dotfiles location for dynamic path setup
 
-# Handle symlinks: resolve to the actual file location
-if [ -n "$ZSH_VERSION" ]; then
-    _rc_file="${(%):-%x}"
-else
-    _rc_file="${BASH_SOURCE[0]}"
-fi
-# Resolve symlinks using readlink
-if [ -L "$_rc_file" ]; then
-    _rc_file="$(readlink "$_rc_file")"
-fi
-DOTFILES="$(cd "$(dirname "$_rc_file")" && pwd)"
-unset _rc_file
+# SSH agent uses a stable symlink that ~/.ssh/rc keeps updated
+export SSH_AUTH_SOCK="$HOME/.ssh/ssh_auth_sock"
 
-# Use stable SSH agent socket symlink if available (maintained by ~/.ssh/rc)
-if [ -S "$HOME/.ssh/ssh_auth_sock" ]; then
-    export SSH_AUTH_SOCK="$HOME/.ssh/ssh_auth_sock"
-fi
-
-# Source secrets if available
-[ -f "$DOTFILES/secrets.sh" ] && source "$DOTFILES/secrets.sh"
-
-# source work zshrc if available
-[ -f "$DOTFILES/.dotfiles-work/.zshrc" ] && source "$DOTFILES/.dotfiles-work/.zshrc"
-
-# source venv wrapper if available
-[ -f "$DOTFILES/bin/venv_wrapper" ] && source "$DOTFILES/bin/venv_wrapper"
+# Source user secrets if they exist
+[ -f "$HOME/.dotfiles/secrets.sh" ] && source "$HOME/.dotfiles/secrets.sh"
