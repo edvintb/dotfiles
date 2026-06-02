@@ -1,5 +1,10 @@
 #!/usr/bin/env zsh
 
+# Auto-detect dotfiles repo location (directory containing this script)
+DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+echo "Dotfiles location: $DOTFILES"
+echo ""
+
 link() {
     local src="$1"
     local dst="$2"
@@ -27,33 +32,37 @@ link() {
 }
 
 # files
-link $HOME/.dotfiles/.zshrc $HOME/.zshrc
-link $HOME/.dotfiles/.bashrc $HOME/.bashrc
-link $HOME/.dotfiles/.gitconfig $HOME/.gitconfig
-link $HOME/.dotfiles/vimrc $HOME/.vimrc
+link $DOTFILES/.zshrc $HOME/.zshrc
+link $DOTFILES/.bashrc $HOME/.bashrc
+link $DOTFILES/.gitconfig $HOME/.gitconfig
+link $DOTFILES/vimrc $HOME/.vimrc
 
 # claude
 mkdir -p $HOME/.claude
-link $HOME/.dotfiles/claude/settings.json $HOME/.claude/settings.json
-link $HOME/.dotfiles/claude/CLAUDE.md $HOME/.claude/CLAUDE.md
+link $DOTFILES/claude/settings.json $HOME/.claude/settings.json
+link $DOTFILES/claude/CLAUDE.md $HOME/.claude/CLAUDE.md
 
 # .config
-link $HOME/.dotfiles/nvim $HOME/.config/nvim
-link $HOME/.dotfiles/tmux $HOME/.config/tmux
-link $HOME/.dotfiles/lazygit $HOME/.config/lazygit
-link $HOME/.dotfiles/lf $HOME/.config/lf
-link $HOME/.dotfiles/kitty $HOME/.config/kitty
-link $HOME/.dotfiles/sway $HOME/.config/sway
-link $HOME/.dotfiles/i3 $HOME/.config/i3
-link $HOME/.dotfiles/i3status $HOME/.config/i3status
-link $HOME/.dotfiles/redshift $HOME/.config/redshift
-link $HOME/.dotfiles/aerospace $HOME/.config/aerospace
-link $HOME/.dotfiles/karabiner $HOME/.config/karabiner
+link $DOTFILES/nvim $HOME/.config/nvim
+link $DOTFILES/tmux $HOME/.config/tmux
+link $DOTFILES/lazygit $HOME/.config/lazygit
+link $DOTFILES/lf $HOME/.config/lf
+link $DOTFILES/kitty $HOME/.config/kitty
+link $DOTFILES/sway $HOME/.config/sway
+link $DOTFILES/i3 $HOME/.config/i3
+link $DOTFILES/i3status $HOME/.config/i3status
+link $DOTFILES/redshift $HOME/.config/redshift
+link $DOTFILES/aerospace $HOME/.config/aerospace
+link $DOTFILES/karabiner $HOME/.config/karabiner
+
+# ssh (for agent-forwarding socket symlink — see ssh/rc)
+mkdir -p $HOME/.ssh
+link $DOTFILES/ssh/rc $HOME/.ssh/rc
 
 # directories
-link $HOME/.dotfiles/bin $HOME/bin-personal
+link $DOTFILES/bin $HOME/bin-personal
 # make obsidian vault
 mkdir -p $HOME/vault
 
 # link the tmux
-link $HOME/.dotfiles/tmux/tmux.conf $HOME/.tmux.conf
+link $DOTFILES/tmux/tmux.conf $HOME/.tmux.conf

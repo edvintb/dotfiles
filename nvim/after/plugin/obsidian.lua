@@ -1,29 +1,15 @@
 require("obsidian").setup({
+    legacy_commands = false,
     workspaces = {
         {
             name = "vault",
             path = "~/vault",
-            -- overrides = {
-            --     notes_subdir = "notes",
-            -- },
         },
     },
 
-    completion = {
-        nvim_cmp = true,
-        min_chars = 2,
-    },
-    mappings = {
-        ["gd"] = {
-            action = function()
-                return require("obsidian").util.gf_passthrough()
-            end,
-            opts = { noremap = false, expr = true, buffer = true },
-        },
-    },
-    ui = {
-        enable = false,
-    },
+    -- Completion now flows through the in-process `obsidian-ls` LSP; blink.cmp
+    -- picks it up via the regular `lsp` source — no plugin-specific wiring.
+    ui = { enable = false },
     notes_subdir = "",
     new_notes_location = "notes_subdir",
 
@@ -41,33 +27,41 @@ require("obsidian").setup({
         return os.date("%Y%m%d%H%M") .. "-" .. suffix
     end,
 
-    ---@return table
-    note_frontmatter_func = function(note)
-        if note.title then
-            note:add_alias(note.title)
-        end
-
-        local year = note.id:sub(1, 4)
-        local month = note.id:sub(5, 6)
-        local day = note.id:sub(7, 8)
-        local hour = note.id:sub(9, 10)
-        local minute = note.id:sub(11, 12)
-        local cdate = string.format("%s-%s-%s %s:%s", year, month, day, hour, minute)
-
-        local out = { id = note.id, cdate = cdate, aliases = note.aliases, tags = note.tags }
-
-        -- `note.metadata` contains any manually added fields in the frontmatter.
-        -- So here we just make sure those fields are kept in the frontmatter.
-        if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
-            for k, v in pairs(note.metadata) do
-                out[k] = v
+    frontmatter = {
+        ---@return table
+        func = function(note)
+            if note.title then
+                note:add_alias(note.title)
             end
-        end
 
-        return out
-    end,
+            local year = note.id:sub(1, 4)
+            local month = note.id:sub(5, 6)
+            local day = note.id:sub(7, 8)
+            local hour = note.id:sub(9, 10)
+            local minute = note.id:sub(11, 12)
+            local cdate = string.format("%s-%s-%s %s:%s", year, month, day, hour, minute)
 
+            local out = { id = note.id, cdate = cdate, aliases = note.aliases, tags = note.tags }
+
+            if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
+                for k, v in pairs(note.metadata) do
+                    out[k] = v
+                end
+            end
+
+            return out
+        end,
+    },
 })
 
-vim.keymap.set('n', '<leader>n', ':ObsidianNew ', { noremap = true })
+-- `gd` passthrough: open links under cursor in markdown buffers
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = 'markdown',
+    callback = function(ev)
+        vim.keymap.set('n', 'gd', function()
+            return require('obsidian').util.gf_passthrough()
+        end, { buffer = ev.buf, expr = true, noremap = false, desc = 'obsidian gf passthrough' })
+    end,
+})
 
+vim.keymap.set('n', '<leader>n', ':Obsidian new ', { noremap = true })

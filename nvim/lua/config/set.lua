@@ -45,8 +45,6 @@ vim.opt.scrolloff = 8
 -- keep signcolumn always open
 vim.opt.signcolumn = "yes"
 
--- fast updates
-vim.opt.updatetime = 50
 
 -- don't continue comments on the next line
 vim.cmd([[autocmd BufEnter,BufNewFile,BufRead * set formatoptions-=cro]])
@@ -56,9 +54,7 @@ vim.keymap.set('n', ';', ':', { noremap = true })
 vim.keymap.set('n', ':', ';', { noremap = true })
 vim.keymap.set('n', 'q;', 'q:', { noremap = true })
 
--- code folding
-vim.opt.foldmethod = "expr"
-vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+-- code folding (per-buffer foldexpr is set in after/plugin/treesitter.lua FileType autocmd)
 vim.opt.foldenable = false
 -- TODO: set additional fold options
 -- https://neovim.io/doc/user/fold.html#fold-commands

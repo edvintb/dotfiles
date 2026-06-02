@@ -1,67 +1,35 @@
--- manage code suggestion format
-vim.opt.completeopt = { 'menuone', 'noselect', 'noinsert', 'preview' }
-vim.opt.shortmess = vim.opt.shortmess + { c = true }
+-- blink.cmp config (replaces nvim-cmp + cmp-* + vim-vsnip).
+-- LuaSnip + friendly-snippets still provide the snippet bodies.
+require('luasnip.loaders.from_vscode').lazy_load()
 
-local cmp = require('cmp')
-local luasnip = require('luasnip')
-
--- TODO: show suggestions when instantiating a class or calling a function
-cmp.setup({
-    mapping = {
-        -- suggestion navigation
-        ['<C-j>'] = cmp.mapping(function()
-            if cmp.visible() then
-                cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
-            else
-                cmp.complete()
-            end
-        end),
-        ['<C-k>'] = cmp.mapping(function()
-            if cmp.visible() then
-                cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
-            else
-                cmp.complete()
-            end
-        end),
-        ['<C-y>'] = cmp.mapping.confirm({ select = true, behavior = cmp.ConfirmBehavior.Insert }),
-        ['<C-e>'] = cmp.mapping.abort(),
-        ['<C-u>'] = cmp.mapping.scroll_docs(-4),
-        ['<C-d>'] = cmp.mapping.scroll_docs(4),
-        ['<C-n>'] = cmp.mapping(function() luasnip.jump(1) end, { 'i', 's' }),
-        ['<C-p>'] = cmp.mapping(function() luasnip.jump(-1) end, { 'i', 's' }),
+require('blink.cmp').setup({
+    keymap = {
+        preset = 'none',
+        ['<C-j>'] = { 'select_next', 'show' },
+        ['<C-k>'] = { 'select_prev', 'show' },
+        ['<C-y>'] = { 'accept', 'fallback' },
+        ['<C-e>'] = { 'cancel', 'fallback' },
+        ['<C-u>'] = { 'scroll_documentation_up', 'fallback' },
+        ['<C-d>'] = { 'scroll_documentation_down', 'fallback' },
+        ['<C-n>'] = { 'snippet_forward', 'fallback' },
+        ['<C-p>'] = { 'snippet_backward', 'fallback' },
     },
-
-    -- TODO: order the sources such that lsp comes first in the suggestions (currently doesn't always)
-    -- TODO: just think about which of these is really relevant
-    sources = {
-        { name = 'nvim_lsp', keyword_length = 2 },
-        { name = 'nvim_lsp_signature_help' },
-        -- { name = 'nvim_lua' , keyword_length = 2 },
-        -- { name = 'buffer', keyword_length = 2 },
-        -- { name = 'path' },
-        -- { name = 'luasnip', show_autosnippets = true },
-        -- { name = 'vsnip', keyword_length = 2 },
-    },
-
-    -- TODO: why is this not working?? print statements not showing up...
-    formatting = {
-        fields = {'menu', 'abbr', 'kind'},
-        format = function(entry, item)
-            print('running formatting function...')
-            local menu_icon = {
-                nvim_lsp = 'λ',
-                luasnip = '⋗',
-                buffer = 'Ω',
-                path = '🖫',
-                nvim_lua = 'Π',
-            }
-            item.menu = menu_icon[entry.source.name]
-            return item
-        end,
-    },
-
-    preselect = 'item',
+    snippets = { preset = 'luasnip' },
     completion = {
-        completeopt = 'menu,menuone,noinsert'
+        list = { selection = { preselect = true, auto_insert = false } },
+        menu = {
+            draw = {
+                columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 }, { 'source_name' } },
+            },
+        },
+        documentation = { auto_show = true, auto_show_delay_ms = 200 },
     },
+    sources = {
+        default = { 'lsp', 'snippets', 'buffer', 'path' },
+        providers = {
+            lsp = { min_keyword_length = 2 },
+        },
+    },
+    signature = { enabled = true },
+    fuzzy = { implementation = 'prefer_rust_with_warning' },
 })

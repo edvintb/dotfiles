@@ -1,0 +1,7 @@
+#!/bin/bash
+# Runs by sshd on every incoming connection, before any shell or tmux.
+# Repoints a stable symlink at the fresh agent-forwarding socket so that
+# long-lived processes (tmux panes) keep working across reconnects.
+if [ -S "$SSH_AUTH_SOCK" ] && [ "$SSH_AUTH_SOCK" != "$HOME/.ssh/ssh_auth_sock" ]; then
+    ln -sf "$SSH_AUTH_SOCK" "$HOME/.ssh/ssh_auth_sock"
+fi

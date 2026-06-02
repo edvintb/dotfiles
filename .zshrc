@@ -207,9 +207,7 @@ function insert-newline-widget() {
 zle -N insert-newline-widget
 bindkey '^[[13;2u' insert-newline-widget  # Bind the kitty keyboard protocol Shift+Enter sequence
 
-if [ ! -S ~/.ssh/ssh_auth_sock ] && [ -S "$SSH_AUTH_SOCK" ]; then
-    ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
-fi
+# SSH agent-forwarding socket symlink is maintained by ~/.ssh/rc (see ssh/rc in dotfiles)
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm

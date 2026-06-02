@@ -2,6 +2,8 @@ TODO.md
 **/lazy-lock.json
 **/.zsh_secrets
 **/.nfs*
+vim/.netrwhist
+vim/undodir/
 # zshrc_private*
 # !.gitkeep
 # lazygit/state.yml

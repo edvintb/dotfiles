@@ -239,3 +239,10 @@ Resume logic must happen **before** the DataLoader is constructed, so that the t
 - `git stack sync` uses `--force-with-lease` when pushing rebased branches
 - Dependencies tracked in `.git/stack-meta/depends` (format: `branch:dep1,dep2`)
 - Designed for fork workflows where you can't push to upstream — all PRs target main
+
+## Podchat iOS Project
+
+When I say "build":
+- **Just build** — run `xcodebuild` and report success/errors
+- **Don't start simulator** — leave that for you to do manually via Xcode
+- **Don't install/launch** — only build the binary

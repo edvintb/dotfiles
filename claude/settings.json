@@ -204,11 +204,17 @@
       "Bash(awk '{print $2}')",
       "Bash(gkr l *)",
       "Bash(gkr switch *)",
-      "Bash(gkr cluster *)"
+      "Bash(gkr cluster *)",
+      "Bash(rm -rf ~/.vscode/extensions/swiftlang.swift-vscode-2.16.5)",
+      "WebFetch(domain:marketplace.visualstudio.com)",
+      "WebFetch(domain:forums.swift.org)"
     ],
     "deny": [],
     "ask": [],
-    "defaultMode": "auto"
+    "defaultMode": "auto",
+    "additionalDirectories": [
+      "/Users/edvinberhan/.vscode/extensions/swiftlang.swift-vscode-2.16.5"
+    ]
   },
   "hooks": {
     "SessionStart": [
@@ -223,7 +229,8 @@
     ]
   },
   "enabledPlugins": {
-    "rapidata-sdk-plugin@rapidata-sdk-marketplace": true
+    "rapidata-sdk-plugin@rapidata-sdk-marketplace": true,
+    "swift-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "rapidata-sdk-marketplace": {
@@ -290,5 +297,6 @@
       "tool": "Bash",
       "prompt": "run linters and formatters"
     }
-  ]
+  ],
+  "model": "haiku"
 }

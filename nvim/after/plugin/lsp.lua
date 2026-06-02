@@ -1,24 +1,21 @@
 local wk = require("which-key")
 
-require('luasnip.loaders.from_vscode').lazy_load()
-
-vim.lsp.config('*', {
-    capabilities = require('cmp_nvim_lsp').default_capabilities(),
-})
+-- LSP capabilities (snippets, completionItem.resolve, etc.) are contributed
+-- automatically by blink.cmp into `vim.lsp.config('*')` — nothing to wire here.
 
 vim.api.nvim_create_autocmd('LspAttach', {
     callback = function(event)
         local opts = { buffer = event.buf, remap = false }
-        vim.keymap.set("n", "[d", function() vim.diagnostic.goto_prev() end, opts)
-        vim.keymap.set("n", "]d", function() vim.diagnostic.goto_next() end, opts)
+        vim.keymap.set("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, opts)
+        vim.keymap.set("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, opts)
         vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, opts)
         vim.keymap.set("n", "gR", function() vim.lsp.buf.rename() end, opts)
         vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)
         wk.add({
             { "gd", desc = "vim.lsp.buf.definition()" },
             { "gR", desc = "vim.lsp.buf.rename()" },
-            { "[d", desc = "vim.diagnostic.goto_prev()" },
-            { "]d", desc = "vim.diagnostic.goto_next()" },
+            { "[d", desc = "vim.diagnostic.jump prev" },
+            { "]d", desc = "vim.diagnostic.jump next" },
         })
     end,
 })
@@ -32,7 +29,7 @@ vim.lsp.config('ruff', {
         vim.api.nvim_create_autocmd("BufWritePre", {
             buffer = bufnr,
             callback = function()
-                if client.supports_method("textDocument/formatting") then
+                if client:supports_method("textDocument/formatting") then
                     vim.lsp.buf.format({ bufnr = bufnr })
                 else
                     vim.notify("Ruff formatter not available for this buffer.", vim.log.levels.WARN)
@@ -40,7 +37,7 @@ vim.lsp.config('ruff', {
             end,
         })
         vim.keymap.set('n', '<leader>lf', function()
-            if client.supports_method("textDocument/formatting") then
+            if client:supports_method("textDocument/formatting") then
                 vim.lsp.buf.format()
             else
                 vim.notify("Ruff formatter not available for this buffer.", vim.log.levels.WARN)
@@ -69,7 +66,7 @@ vim.lsp.config('lua_ls', {
             runtime = { version = 'LuaJIT' },
             workspace = {
                 checkThirdParty = false,
-                library = vim.api.nvim_get_runtime_file("", true),
+                library = { vim.env.VIMRUNTIME },
             },
         },
     },

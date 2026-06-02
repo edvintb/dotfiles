@@ -15,14 +15,7 @@ require('telescope').setup{
                 ["<C-c>"] = actions.close,
             },
         },
-        -- Make find_files start in the Neovim CWD
-        find_files_opts = {
-            cwd_to_path = true,
-        },
-        -- Set default search directory for live_grep to Neovim CWD
-        live_grep_opts = {
-            search_dirs = { vim.fn.getcwd() },
-        },
+        -- find_files and live_grep already default to Neovim's CWD.
         -- TODO: figure out how to make this better
         -- doesn't show the directory structure at all
         path_display = {"smart"},

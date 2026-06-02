@@ -219,6 +219,8 @@ link "$HOME/.dotfiles/lazygit" "$HOME/.config/lazygit"
 link "$HOME/.dotfiles/lf" "$HOME/.config/lf"
 link "$HOME/.dotfiles/bin" "$HOME/bin-personal"
 link "$HOME/.dotfiles/tmux/tmux.conf" "$HOME/.tmux.conf"
+mkdir -p "$HOME/.ssh"
+link "$HOME/.dotfiles/ssh/rc" "$HOME/.ssh/rc"
 echo "✓ Dotfiles linked"
 
 # -----------------------------------------------

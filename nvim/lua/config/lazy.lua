@@ -2,7 +2,7 @@ require("config.set")
 require("config.remap")
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
     vim.fn.system({
         "git",
         "clone",
@@ -56,10 +56,12 @@ require("lazy").setup({
     },
     {
         'nvim-treesitter/nvim-treesitter',
-        dependencies = {
-            'nvim-treesitter/nvim-treesitter-textobjects',
-        },
+        lazy = false,
         build = ':TSUpdate',
+    },
+    {
+        'nvim-treesitter/nvim-treesitter-textobjects',
+        dependencies = { 'nvim-treesitter/nvim-treesitter' },
     },
     { 'nvim-treesitter/nvim-treesitter-context' },
     { 'nvim-tree/nvim-web-devicons' },
@@ -74,8 +76,7 @@ require("lazy").setup({
     { 'tpope/vim-rhubarb' },
     { 'mbbill/undotree' },
     { 'lewis6991/gitsigns.nvim' },
-    { "numToStr/Comment.nvim" },
-    -- { "lukas-reineke/indent-blankline.nvim" },
+    -- (commenting uses Neovim 0.10+ native `gc`/`gcc` mapped to <leader>c in after/plugin/comment.lua)
     { "lukas-reineke/indent-blankline.nvim", main = "ibl", opts = {} },
     {
         'folke/trouble.nvim',
@@ -100,25 +101,30 @@ require("lazy").setup({
         }
     },
     -- lsp
-    { 'neovim/nvim-lspconfig' },
+    { 'neovim/nvim-lspconfig' },  -- still useful: ships default `cmd`/`filetypes`/`root_markers` for ~150 servers
     {
         'williamboman/mason.nvim',
         build = function()
             pcall(vim.cmd, 'MasonUpdate')
         end,
+        opts = {},
     },
-    { 'williamboman/mason-lspconfig.nvim' },
-    -- autocomplete
-    { 'hrsh7th/nvim-cmp' },
-    { 'hrsh7th/cmp-nvim-lsp' },
-    { 'L3MON4D3/LuaSnip' },
-    { 'hrsh7th/cmp-buffer' },
-    { 'hrsh7th/cmp-path' },
-    { 'hrsh7th/cmp-vsnip' },
-    { 'hrsh7th/vim-vsnip' },
-    { 'hrsh7th/cmp-nvim-lsp-signature-help' },
-    { 'saadparwaiz1/cmp_luasnip' },
-    { 'rafamadriz/friendly-snippets' },
+    {
+        'williamboman/mason-lspconfig.nvim',
+        dependencies = { 'williamboman/mason.nvim', 'neovim/nvim-lspconfig' },
+        opts = {
+            ensure_installed = { 'lua_ls', 'rust_analyzer', 'pyright', 'ruff' },
+            automatic_installation = false,  -- explicit list above
+        },
+    },
+    -- autocomplete (blink.cmp replaces nvim-cmp + 8 satellite plugins)
+    {
+        'saghen/blink.cmp',
+        version = '*',  -- use a tagged release so the prebuilt fuzzy binary is downloaded
+        dependencies = {
+            { 'L3MON4D3/LuaSnip', dependencies = { 'rafamadriz/friendly-snippets' } },
+        },
+    },
     -- language-specific plugins
     { 'mfussenegger/nvim-jdtls' },
     -- { 'simrat39/rust-tools.nvim' },
@@ -146,7 +152,7 @@ require("lazy").setup({
     },
 
     {
-        "epwalsh/obsidian.nvim",
+        "obsidian-nvim/obsidian.nvim",
         version = "*",  -- recommended, use latest release instead of latest commit
         lazy = true,
         ft = "markdown",
