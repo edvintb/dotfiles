@@ -1,5 +1,12 @@
 #!/bin/bash
 # Runs by sshd on every incoming connection, before any shell.
 # Repoints a stable symlink at the fresh agent-forwarding socket.
-# Always update: fresh socket from this connection is always the right one.
-[ -n "$SSH_AUTH_SOCK" ] && [ "$SSH_AUTH_SOCK" != "$HOME/.ssh/ssh_auth_sock" ] && ln -sf "$SSH_AUTH_SOCK" "$HOME/.ssh/ssh_auth_sock"
+
+if [ -z "$SSH_AUTH_SOCK" ]; then
+    echo "[ssh/rc] SSH_AUTH_SOCK not set, skipping symlink update" >&2
+elif [ "$SSH_AUTH_SOCK" = "$HOME/.ssh/ssh_auth_sock" ]; then
+    echo "[ssh/rc] SSH_AUTH_SOCK already points to symlink, no update needed" >&2
+else
+    ln -sf "$SSH_AUTH_SOCK" "$HOME/.ssh/ssh_auth_sock"
+    echo "[ssh/rc] Updated symlink: $HOME/.ssh/ssh_auth_sock -> $SSH_AUTH_SOCK" >&2
+fi
