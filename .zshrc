@@ -215,7 +215,7 @@ export PATH=$PATH:/mnt/home/go/bin
 # Google Cloud SDK bin (for gke-gcloud-auth-plugin)
 export PATH="/opt/homebrew/share/google-cloud-sdk/bin:$PATH"
 
-# Auto-start tmux on SSH login
-if [[ -n "$SSH_CONNECTION" && -z "$TMUX" ]]; then
+# Auto-start tmux on SSH login (only if connected to a terminal)
+if [[ -n "$SSH_CONNECTION" && -z "$TMUX" && -t 1 ]]; then
     exec tmux new-session -A -s main
 fi
