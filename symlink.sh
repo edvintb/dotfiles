@@ -8,6 +8,7 @@ echo ""
 link() {
     local src="$1"
     local dst="$2"
+    local make_executable="${3:-false}"
 
     # Check if symlink already exists and points to the correct location
     if [[ -L $dst ]]; then
@@ -28,11 +29,12 @@ link() {
     fi
 
     ln -s "$src" "$dst"
+    [ "$make_executable" = "true" ] && chmod +x "$dst"
     echo "✓ Created symlink: $dst -> $src"
 }
 
 # files
-link $DOTFILES/init.sh $HOME/.dotfiles_rc
+link $DOTFILES/init.sh $HOME/.dotfiles_rc true
 link $DOTFILES/.zshrc $HOME/.zshrc
 link $DOTFILES/.bashrc $HOME/.bashrc
 link $DOTFILES/.gitconfig $HOME/.gitconfig

@@ -2,9 +2,14 @@
 # Auto-detects dotfiles location for dynamic path setup
 
 # Handle symlinks: resolve to the actual file location
-_rc_file="${BASH_SOURCE[0]:-$0}"
+if [ -n "$ZSH_VERSION" ]; then
+    _rc_file="${(%):-%x}"
+else
+    _rc_file="${BASH_SOURCE[0]}"
+fi
+# Resolve symlinks (readlink -f not available on macOS, use cd -P instead)
 if [ -L "$_rc_file" ]; then
-    _rc_file="$(readlink -f "$_rc_file")"
+    _rc_file="$(cd "$(dirname "$_rc_file")" && pwd -P)/$(basename "$_rc_file")"
 fi
 DOTFILES="$(cd "$(dirname "$_rc_file")" && pwd)"
 unset _rc_file
