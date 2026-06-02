@@ -106,7 +106,3 @@ pwf() {
 
 [ -f "$HOME/.ssh/agent.env" ] && source "$HOME/.ssh/agent.env"
 
-# Auto-start tmux on SSH login (only if connected to a terminal)
-if [[ -n "$SSH_CONNECTION" && -z "$TMUX" && -t 1 ]]; then
-    exec tmux new-session -A -s main
-fi
