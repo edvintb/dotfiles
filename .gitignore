@@ -1,6 +1,6 @@
 TODO.md
 **/lazy-lock.json
-**/.zsh_secrets
+secrets.sh
 **/.nfs*
 vim/.netrwhist
 vim/undodir/

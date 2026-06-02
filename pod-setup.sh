@@ -207,6 +207,7 @@ link() {
     echo "✓ Linked: $dst"
 }
 
+link "$HOME/.dotfiles/init.sh" "$HOME/.dotfiles_rc"
 link "$HOME/.dotfiles/.bashrc" "$HOME/.bashrc"
 link "$HOME/.dotfiles/.gitconfig" "$HOME/.gitconfig"
 link "$HOME/.dotfiles/vimrc" "$HOME/.vimrc"

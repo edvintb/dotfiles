@@ -32,6 +32,7 @@ link() {
 }
 
 # files
+link $DOTFILES/init.sh $HOME/.dotfiles_rc
 link $DOTFILES/.zshrc $HOME/.zshrc
 link $DOTFILES/.bashrc $HOME/.bashrc
 link $DOTFILES/.gitconfig $HOME/.gitconfig

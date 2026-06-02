@@ -61,26 +61,8 @@ export PATH=$PATH:$HOME/delta/target/release
 export TMUX_TMPDIR=/tmp
 export TERM="xterm-256color"  # Or export TERM="xterm-kitty"
 
-# source secrets
-ZSHRC_SECRETS=~/.dotfiles/.zsh_secrets
-if [[ -f $ZSHRC_SECRETS ]]; then
-    source $ZSHRC_SECRETS
-fi
-
-# source private config
-ZSHRC_PRIVATE=~/.dotfiles/zshrc_private
-if [[ -f $ZSHRC_PRIVATE ]]; then
-    source $ZSHRC_PRIVATE
-fi
-
-# source work zshrc
-ZSHRC_WORK=$HOME/.dotfiles/.dotfiles-work/.zshrc
-if [[ -f $ZSHRC_WORK ]]; then
-    source $ZSHRC_WORK
-fi
-
-# source the virtual env wrapper
-source $HOME/.dotfiles/bin/venv_wrapper
+# Source dotfiles initialization (handles all dotfiles-specific paths dynamically)
+[ -f "$HOME/.dotfiles_rc" ] && source "$HOME/.dotfiles_rc"
 
 # enable fzf completion
 source <(fzf --zsh)
@@ -232,3 +214,8 @@ export PATH=$PATH:/mnt/home/go/bin
 
 # Google Cloud SDK bin (for gke-gcloud-auth-plugin)
 export PATH="/opt/homebrew/share/google-cloud-sdk/bin:$PATH"
+
+# Auto-start tmux on SSH login
+if [[ -n "$SSH_CONNECTION" && -z "$TMUX" ]]; then
+    exec tmux new-session -A -s main
+fi

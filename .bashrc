@@ -101,15 +101,12 @@ pwf() {
 # UV wrapper with local venv and cache
 # uvl is a standalone script at ~/.local/bin/uvl
 
-# Source secrets if available
-BASHRC_SECRETS=~/.dotfiles/.bash_secrets
-if [[ -f $BASHRC_SECRETS ]]; then
-    source $BASHRC_SECRETS
-fi
+# Source dotfiles initialization (handles all dotfiles-specific paths dynamically)
+[ -f "$HOME/.dotfiles_rc" ] && source "$HOME/.dotfiles_rc"
 
-# Source private config if available
-BASHRC_PRIVATE=~/.dotfiles/bashrc_private
-if [[ -f $BASHRC_PRIVATE ]]; then
-    source $BASHRC_PRIVATE
-fi
 [ -f "$HOME/.ssh/agent.env" ] && source "$HOME/.ssh/agent.env"
+
+# Auto-start tmux on SSH login
+if [[ -n "$SSH_CONNECTION" && -z "$TMUX" ]]; then
+    exec tmux new-session -A -s main
+fi
