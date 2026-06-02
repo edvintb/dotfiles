@@ -9,6 +9,11 @@ fi
 DOTFILES="$(cd "$(dirname "$_rc_file")" && pwd)"
 unset _rc_file
 
+# Use stable SSH agent socket symlink if available (maintained by ~/.ssh/rc)
+if [ -S "$HOME/.ssh/ssh_auth_sock" ]; then
+    export SSH_AUTH_SOCK="$HOME/.ssh/ssh_auth_sock"
+fi
+
 # Source secrets if available
 [ -f "$DOTFILES/secrets.sh" ] && source "$DOTFILES/secrets.sh"
 
