@@ -5,26 +5,20 @@ set -e
 
 # Parse command line arguments
 INSTALL_PREFIX=""
-NO_DEPS=false
 while [[ $# -gt 0 ]]; do
   case $1 in
     -i|--install-dir)
       INSTALL_PREFIX="$2"
       shift 2
       ;;
-    --no-deps)
-      NO_DEPS=true
-      shift
-      ;;
     -h|--help)
-      echo "Usage: $0 [-i|--install-dir <path>] [--no-deps]"
+      echo "Usage: $0 [-i|--install-dir <path>]"
       echo "  -i, --install-dir: Specify custom install location (default: system-wide)"
-      echo "  --no-deps:         Skip apt dependency install (caller already installed them)"
       exit 0
       ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: $0 [-i|--install-dir <path>] [--no-deps]"
+      echo "Usage: $0 [-i|--install-dir <path>]"
       exit 1
       ;;
   esac
@@ -32,10 +26,20 @@ done
 
 nvim_path=$HOME/neovim
 
-# install build pre-reqs
-if [ "$NO_DEPS" != true ]; then
-  sudo apt-get install ninja-build gettext cmake curl build-essential -y
+# --- install build pre-reqs (self-contained: caller need not know them) ---
+# Detect sudo: use it when we're not root and it's available.
+SUDO=""
+if [ "$(id -u)" -ne 0 ]; then
+  if command -v sudo >/dev/null 2>&1; then
+    SUDO="sudo"
+  fi
 fi
+
+# -o DPkg::Lock::Timeout waits for the dpkg lock instead of failing outright,
+# so a concurrent apt run (e.g. the tmux build) can coexist safely.
+$SUDO apt-get update -o DPkg::Lock::Timeout=300 -qq
+$SUDO apt-get install -o DPkg::Lock::Timeout=300 -y \
+  ninja-build gettext cmake curl build-essential
 
 # remove repo (if exists) and clone the latest version
 rm -rf $nvim_path
@@ -60,5 +64,5 @@ fi
 if [ -n "$INSTALL_PREFIX" ]; then
   make install
 else
-  sudo make install
+  $SUDO make install
 fi

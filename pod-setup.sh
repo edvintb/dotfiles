@@ -92,30 +92,10 @@ wait_all_with_progress() {
 
 log ">>> Starting parallel installs (rustup, binary downloads)..."
 
-# --- apt build dependencies (only needed to compile tmux/nvim from source) ---
-# Launched only when --tmux/--nvim is passed, so a normal run never blocks on apt.
-APT_PID=""
-if [ "$BUILD_TMUX" = true ] || [ "$BUILD_NVIM" = true ]; then
-(
-    $SUDO apt-get update -qq
-    $SUDO apt-get install -y -qq \
-        curl \
-        zsh \
-        build-essential \
-        cmake \
-        ninja-build \
-        gettext \
-        autoconf \
-        automake \
-        bison \
-        pkg-config \
-        libevent-dev \
-        ncurses-dev \
-        > /dev/null 2>&1
-    echo "✓ apt build dependencies installed"
-) &
-APT_PID=$!
-fi
+# NOTE: tmux/neovim build dependencies are NOT installed here — each build
+# script (tmux/reve-build-tmux.sh, nvim/reve-nv-build.sh) installs its own apt
+# deps, so this script doesn't need to know them. curl (for the downloads below)
+# and zsh are assumed present on the base image.
 
 # --- Rust toolchain (needed before rust-tools-install) ---
 (
@@ -251,27 +231,18 @@ mkdir -p "$HOME/.config"
 mkdir -p "$LOCAL_BIN"
 
 # -----------------------------------------------
-# 3. Launch dependent builds as soon as their prerequisites finish
+# 3. Launch opt-in builds + rust tools
 # -----------------------------------------------
-# tmux + neovim are opt-in (--tmux/--nvim); when requested they need apt
-# (build-essential, cmake, ninja, etc.) which is installed above.
+# tmux/neovim are opt-in via --tmux/--nvim, and each build script installs its
+# own apt dependencies (so the caller doesn't manage them). The heavy build
+# logic lives in the standalone scripts so they can also be run by hand.
 # rust-tools-install needs cargo from rustup.
-# `wait $PID` only works on direct children of the current shell, so we
-# block in the main shell rather than nested subshells. The other parallel
-# downloads keep running concurrently while we wait here.
 echo ""
-log ">>> Waiting on prerequisites to launch dependent builds..."
-
-# Once apt is done (if it ran), fan out the requested tmux/nvim builds. The
-# heavy build logic lives in the standalone scripts so it can also be run by
-# hand; we pass --no-deps since apt already installed the build dependencies.
-if [ -n "$APT_PID" ]; then
-    wait_with_progress $APT_PID "apt build dependencies"
-fi
+log ">>> Launching requested builds..."
 
 if [ "$BUILD_TMUX" = true ]; then
     (
-        if bash "$DOTFILES_DIR/tmux/reve-build-tmux.sh" -i "$PREFIX" --no-deps > /tmp/tmux-build.log 2>&1; then
+        if bash "$DOTFILES_DIR/tmux/reve-build-tmux.sh" -i "$PREFIX" > /tmp/tmux-build.log 2>&1; then
             echo "✓ tmux built from source"
         else
             echo "✗ tmux build FAILED (see /tmp/tmux-build.log)"
@@ -281,7 +252,7 @@ fi
 
 if [ "$BUILD_NVIM" = true ]; then
     (
-        if bash "$DOTFILES_DIR/nvim/reve-nv-build.sh" -i "$PREFIX" --no-deps > /tmp/nvim-build.log 2>&1; then
+        if bash "$DOTFILES_DIR/nvim/reve-nv-build.sh" -i "$PREFIX" > /tmp/nvim-build.log 2>&1; then
             echo "✓ neovim built from source"
         else
             echo "✗ neovim build FAILED (see /tmp/nvim-build.log)"
