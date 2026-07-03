@@ -177,52 +177,14 @@ ENVEOF
 ) &
 
 # -----------------------------------------------
-# 2. Symlink dotfiles (runs while background work proceeds)
+# 2. Ensure base dirs / dotfiles self-symlink (needed by background installs)
 # -----------------------------------------------
-echo ""
-echo ">>> Setting up dotfiles symlinks..."
 if [ ! -L "$HOME/.dotfiles" ]; then
     ln -sf "$DOTFILES_DIR" "$HOME/.dotfiles"
 fi
 
 mkdir -p "$HOME/.config"
 mkdir -p "$LOCAL_BIN"
-
-link() {
-    local src="$1"
-    local dst="$2"
-    if [ -L "$dst" ]; then
-        local current_target=$(readlink "$dst")
-        if [ "$current_target" = "$src" ]; then
-            return 0
-        else
-            rm "$dst"
-        fi
-    elif [ -e "$dst" ]; then
-        echo "⚠ Skipping (exists): $dst"
-        return 0
-    fi
-    mkdir -p "$(dirname "$dst")"
-    ln -s "$src" "$dst"
-    echo "✓ Linked: $dst"
-}
-
-link "$HOME/.dotfiles/init.sh" "$HOME/.dotfiles_rc"
-link "$HOME/.dotfiles/.bashrc" "$HOME/.bashrc"
-link "$HOME/.dotfiles/.gitconfig" "$HOME/.gitconfig"
-link "$HOME/.dotfiles/vimrc" "$HOME/.vimrc"
-mkdir -p "$HOME/.claude"
-link "$HOME/.dotfiles/claude/settings.json" "$HOME/.claude/settings.json"
-link "$HOME/.dotfiles/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
-link "$HOME/.dotfiles/nvim" "$HOME/.config/nvim"
-link "$HOME/.dotfiles/tmux" "$HOME/.config/tmux"
-link "$HOME/.dotfiles/lazygit" "$HOME/.config/lazygit"
-link "$HOME/.dotfiles/lf" "$HOME/.config/lf"
-link "$HOME/.dotfiles/bin" "$HOME/bin-personal"
-link "$HOME/.dotfiles/tmux/tmux.conf" "$HOME/.tmux.conf"
-mkdir -p "$HOME/.ssh"
-link "$HOME/.dotfiles/ssh/rc" "$HOME/.ssh/rc"
-echo "✓ Dotfiles linked"
 
 # -----------------------------------------------
 # 3. Launch dependent builds as soon as their prerequisites finish
@@ -278,6 +240,47 @@ fi
 # Wait for everything (initial bg downloads + dependent builds + rust tools)
 wait
 echo "✓ All parallel installs complete"
+
+# -----------------------------------------------
+# 4. Symlink dotfiles (runs after all installs complete)
+# -----------------------------------------------
+echo ""
+echo ">>> Setting up dotfiles symlinks..."
+
+link() {
+    local src="$1"
+    local dst="$2"
+    if [ -L "$dst" ]; then
+        local current_target=$(readlink "$dst")
+        if [ "$current_target" = "$src" ]; then
+            return 0
+        else
+            rm "$dst"
+        fi
+    elif [ -e "$dst" ]; then
+        echo "⚠ Skipping (exists): $dst"
+        return 0
+    fi
+    mkdir -p "$(dirname "$dst")"
+    ln -s "$src" "$dst"
+    echo "✓ Linked: $dst"
+}
+
+link "$HOME/.dotfiles/init.sh" "$HOME/.dotfiles_rc"
+link "$HOME/.dotfiles/.zshrc" "$HOME/.zshrc"
+link "$HOME/.dotfiles/.bashrc" "$HOME/.bashrc"
+link "$HOME/.dotfiles/.gitconfig" "$HOME/.gitconfig"
+link "$HOME/.dotfiles/vimrc" "$HOME/.vimrc"
+mkdir -p "$HOME/.claude"
+link "$HOME/.dotfiles/claude/settings.json" "$HOME/.claude/settings.json"
+link "$HOME/.dotfiles/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+link "$HOME/.dotfiles/nvim" "$HOME/.config/nvim"
+link "$HOME/.dotfiles/tmux" "$HOME/.config/tmux"
+link "$HOME/.dotfiles/lazygit" "$HOME/.config/lazygit"
+link "$HOME/.dotfiles/lf" "$HOME/.config/lf"
+link "$HOME/.dotfiles/bin" "$HOME/bin-personal"
+link "$HOME/.dotfiles/tmux/tmux.conf" "$HOME/.tmux.conf"
+echo "✓ Dotfiles linked"
 
 # -----------------------------------------------
 # 10. SSH setup (known_hosts for github)

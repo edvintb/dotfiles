@@ -35,7 +35,7 @@ plugins=(
 )
 
 fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src  # required for zsh-completions
-source $ZSH/oh-my-zsh.sh
+[ -f "$ZSH/oh-my-zsh.sh" ] && source "$ZSH/oh-my-zsh.sh"
 
 # Suppress user@host in agnoster prompt (always shown over SSH otherwise)
 prompt_context() {}
@@ -65,7 +65,7 @@ export TERM="xterm-256color"  # Or export TERM="xterm-kitty"
 [ -f "$HOME/.dotfiles_rc" ] && source "$HOME/.dotfiles_rc"
 
 # enable fzf completion
-source <(fzf --zsh)
+command -v fzf &>/dev/null && source <(fzf --zsh)
 
 # aliases
 alias t=tmux
@@ -114,7 +114,7 @@ uvl() {
 
   # 2. Define the absolute paths for the VENV and the CACHE
   local venv_path="/tmp/uv-envs/${cur_dir}/.venv"
-  local cache_path="/tmp/.uv-cache"
+  local cache_path="${HOME}/.cache/uv"
 
   echo -e "Using venv: \033[34m${venv_path}\033[0m and cache: \033[34m${cache_path}\033[0m"
 
@@ -198,7 +198,7 @@ export NVM_DIR="$HOME/.nvm"
 # . "$HOME/.cargo/env"
 
 # Initialize zoxide for smart directory navigation
-eval "$(zoxide init zsh)"
+command -v zoxide &>/dev/null && eval "$(zoxide init zsh)"
 
 fpath+=~/.zfunc; autoload -Uz compinit; compinit
 
