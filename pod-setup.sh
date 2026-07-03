@@ -30,6 +30,35 @@ echo ""
 export PATH="$LOCAL_BIN:$HOME/.cargo/bin:$PATH"
 
 # -----------------------------------------------
+# Progress reporting helpers
+# -----------------------------------------------
+SECONDS=0                       # bash builtin: auto-incrementing elapsed seconds
+log() { echo "[+${SECONDS}s] $*"; }
+
+# Wait for a single background PID, printing a heartbeat every 10s so long
+# steps don't look frozen. Returns the job's exit status.
+wait_with_progress() {
+    local pid="$1" label="$2"
+    while kill -0 "$pid" 2>/dev/null; do
+        sleep 10
+        kill -0 "$pid" 2>/dev/null && log "… still waiting on ${label}"
+    done
+    wait "$pid"
+}
+
+# Wait for all remaining background jobs, with a heartbeat reporting how many
+# are still running.
+wait_all_with_progress() {
+    local label="$1" n
+    while [ -n "$(jobs -rp)" ]; do
+        sleep 10
+        n="$(jobs -rp | wc -l | tr -d ' ')"
+        [ "$n" -gt 0 ] && log "… ${label}: ${n} job(s) still running"
+    done
+    wait
+}
+
+# -----------------------------------------------
 # 1. Kick off independent background work immediately
 # -----------------------------------------------
 # These three groups have no dependencies on each other:
@@ -38,26 +67,32 @@ export PATH="$LOCAL_BIN:$HOME/.cargo/bin:$PATH"
 #   - binary downloads (fzf, delta, gh, claude, node) — fully independent
 # Running them concurrently saves ~60-90s vs the previous serial layout.
 
-echo ">>> Starting parallel installs (apt, rustup, binary downloads)..."
+log ">>> Starting parallel installs (apt, rustup, binary downloads)..."
 
 # --- apt build dependencies (ephemeral, needed for tmux/nvim from source) ---
+# Skip entirely when tmux + nvim are already built, since apt is only needed to
+# compile them from source — this turns cached re-runs from ~minute to instant.
 (
-    $SUDO apt-get update -qq
-    $SUDO apt-get install -y -qq \
-        curl \
-        zsh \
-        build-essential \
-        cmake \
-        ninja-build \
-        gettext \
-        autoconf \
-        automake \
-        bison \
-        pkg-config \
-        libevent-dev \
-        ncurses-dev \
-        > /dev/null 2>&1
-    echo "✓ apt build dependencies installed"
+    if [ -x "$LOCAL_BIN/tmux" ] && [ -x "$LOCAL_BIN/nvim" ]; then
+        echo "✓ apt build deps (skipped — tmux/nvim cached)"
+    else
+        $SUDO apt-get update -qq
+        $SUDO apt-get install -y -qq \
+            curl \
+            zsh \
+            build-essential \
+            cmake \
+            ninja-build \
+            gettext \
+            autoconf \
+            automake \
+            bison \
+            pkg-config \
+            libevent-dev \
+            ncurses-dev \
+            > /dev/null 2>&1
+        echo "✓ apt build dependencies installed"
+    fi
 ) &
 APT_PID=$!
 
@@ -203,10 +238,10 @@ mkdir -p "$LOCAL_BIN"
 # block in the main shell rather than nested subshells. The other parallel
 # downloads keep running concurrently while we wait here.
 echo ""
-echo ">>> Waiting on prerequisites to launch dependent builds..."
+log ">>> Waiting on prerequisites to launch dependent builds..."
 
 # Once apt is done, fan out tmux + nvim builds in the background.
-wait $APT_PID
+wait_with_progress $APT_PID "apt build dependencies"
 
 # --- tmux from source ---
 (
@@ -239,15 +274,15 @@ wait $APT_PID
 ) &
 
 # Once rustup is done, kick off rust-tools-install (internally parallel).
-wait $RUST_PID
+wait_with_progress $RUST_PID "rust toolchain"
 export PATH="$HOME/.cargo/bin:$PATH"
 if [ -f "$DOTFILES_DIR/ubuntu-install/rust-tools-install.sh" ]; then
     bash "$DOTFILES_DIR/ubuntu-install/rust-tools-install.sh" &
 fi
 
 # Wait for everything (initial bg downloads + dependent builds + rust tools)
-wait
-echo "✓ All parallel installs complete"
+wait_all_with_progress "installs"
+log "✓ All parallel installs complete"
 
 # -----------------------------------------------
 # 4. Symlink dotfiles (runs after all installs complete)
@@ -343,7 +378,7 @@ check "tokei" "tokei"
 
 echo ""
 echo "============================================"
-echo "  Setup complete!"
+echo "  Setup complete! (total ${SECONDS}s)"
 echo "============================================"
 echo ""
 echo "Everything installed to $PREFIX."
