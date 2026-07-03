@@ -21,6 +21,29 @@ else
     SUDO=""
 fi
 
+# tmux/neovim are compiled from source via the standalone build scripts and are
+# opt-in: only build them (and install the apt build deps they need) when the
+# corresponding flag is passed.
+BUILD_TMUX=false
+BUILD_NVIM=false
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --tmux) BUILD_TMUX=true; shift ;;
+        --nvim) BUILD_NVIM=true; shift ;;
+        -h|--help)
+            echo "Usage: $0 [--tmux] [--nvim]"
+            echo "  --tmux   build tmux from source (tmux/reve-build-tmux.sh)"
+            echo "  --nvim   build neovim from source (nvim/reve-nv-build.sh)"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: $0 [--tmux] [--nvim]"
+            exit 1
+            ;;
+    esac
+done
+
 echo "============================================"
 echo "  Development Environment Setup"
 echo "  Installing to: $PREFIX"
@@ -61,40 +84,38 @@ wait_all_with_progress() {
 # -----------------------------------------------
 # 1. Kick off independent background work immediately
 # -----------------------------------------------
-# These three groups have no dependencies on each other:
-#   - apt-get (needed by tmux/nvim builds later)
+# These groups have no dependencies on each other:
+#   - apt-get (only when --tmux/--nvim, needed by those builds later)
 #   - rustup (needed by rust-tools-install later)
 #   - binary downloads (fzf, delta, gh, claude, node) — fully independent
 # Running them concurrently saves ~60-90s vs the previous serial layout.
 
-log ">>> Starting parallel installs (apt, rustup, binary downloads)..."
+log ">>> Starting parallel installs (rustup, binary downloads)..."
 
-# --- apt build dependencies (ephemeral, needed for tmux/nvim from source) ---
-# Skip entirely when tmux + nvim are already built, since apt is only needed to
-# compile them from source — this turns cached re-runs from ~minute to instant.
+# --- apt build dependencies (only needed to compile tmux/nvim from source) ---
+# Launched only when --tmux/--nvim is passed, so a normal run never blocks on apt.
+APT_PID=""
+if [ "$BUILD_TMUX" = true ] || [ "$BUILD_NVIM" = true ]; then
 (
-    if [ -x "$LOCAL_BIN/tmux" ] && [ -x "$LOCAL_BIN/nvim" ]; then
-        echo "✓ apt build deps (skipped — tmux/nvim cached)"
-    else
-        $SUDO apt-get update -qq
-        $SUDO apt-get install -y -qq \
-            curl \
-            zsh \
-            build-essential \
-            cmake \
-            ninja-build \
-            gettext \
-            autoconf \
-            automake \
-            bison \
-            pkg-config \
-            libevent-dev \
-            ncurses-dev \
-            > /dev/null 2>&1
-        echo "✓ apt build dependencies installed"
-    fi
+    $SUDO apt-get update -qq
+    $SUDO apt-get install -y -qq \
+        curl \
+        zsh \
+        build-essential \
+        cmake \
+        ninja-build \
+        gettext \
+        autoconf \
+        automake \
+        bison \
+        pkg-config \
+        libevent-dev \
+        ncurses-dev \
+        > /dev/null 2>&1
+    echo "✓ apt build dependencies installed"
 ) &
 APT_PID=$!
+fi
 
 # --- Rust toolchain (needed before rust-tools-install) ---
 (
@@ -232,46 +253,41 @@ mkdir -p "$LOCAL_BIN"
 # -----------------------------------------------
 # 3. Launch dependent builds as soon as their prerequisites finish
 # -----------------------------------------------
-# tmux + neovim need apt (build-essential, cmake, ninja, etc.)
-# rust-tools-install needs cargo from rustup
+# tmux + neovim are opt-in (--tmux/--nvim); when requested they need apt
+# (build-essential, cmake, ninja, etc.) which is installed above.
+# rust-tools-install needs cargo from rustup.
 # `wait $PID` only works on direct children of the current shell, so we
 # block in the main shell rather than nested subshells. The other parallel
 # downloads keep running concurrently while we wait here.
 echo ""
 log ">>> Waiting on prerequisites to launch dependent builds..."
 
-# Once apt is done, fan out tmux + nvim builds in the background.
-wait_with_progress $APT_PID "apt build dependencies"
+# Once apt is done (if it ran), fan out the requested tmux/nvim builds. The
+# heavy build logic lives in the standalone scripts so it can also be run by
+# hand; we pass --no-deps since apt already installed the build dependencies.
+if [ -n "$APT_PID" ]; then
+    wait_with_progress $APT_PID "apt build dependencies"
+fi
 
-# --- tmux from source ---
-(
-    if [ -x "$LOCAL_BIN/tmux" ]; then
-        echo "✓ tmux (cached)"
-    else
-        cd /tmp && rm -rf tmux-build
-        git clone --depth 1 https://github.com/tmux/tmux.git tmux-build 2>/dev/null
-        cd tmux-build && sh autogen.sh > /dev/null 2>&1
-        ./configure --prefix="$PREFIX" > /dev/null 2>&1
-        make -j$(nproc) > /dev/null 2>&1 && make install > /dev/null 2>&1
-        rm -rf /tmp/tmux-build
-        echo "✓ tmux built from source"
-    fi
-) &
+if [ "$BUILD_TMUX" = true ]; then
+    (
+        if bash "$DOTFILES_DIR/tmux/reve-build-tmux.sh" -i "$PREFIX" --no-deps > /tmp/tmux-build.log 2>&1; then
+            echo "✓ tmux built from source"
+        else
+            echo "✗ tmux build FAILED (see /tmp/tmux-build.log)"
+        fi
+    ) &
+fi
 
-# --- neovim from source ---
-(
-    if [ -x "$LOCAL_BIN/nvim" ]; then
-        echo "✓ neovim (cached)"
-    else
-        cd /tmp && rm -rf neovim-build
-        git clone --depth 1 --branch stable https://github.com/neovim/neovim.git neovim-build 2>/dev/null
-        cd neovim-build
-        make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX="$PREFIX" -j$(nproc) > /dev/null 2>&1
-        make install > /dev/null 2>&1
-        rm -rf /tmp/neovim-build
-        echo "✓ neovim built from source"
-    fi
-) &
+if [ "$BUILD_NVIM" = true ]; then
+    (
+        if bash "$DOTFILES_DIR/nvim/reve-nv-build.sh" -i "$PREFIX" --no-deps > /tmp/nvim-build.log 2>&1; then
+            echo "✓ neovim built from source"
+        else
+            echo "✗ neovim build FAILED (see /tmp/nvim-build.log)"
+        fi
+    ) &
+fi
 
 # Once rustup is done, kick off rust-tools-install (internally parallel).
 wait_with_progress $RUST_PID "rust toolchain"
@@ -354,8 +370,8 @@ check() {
     fi
 }
 
-check "tmux" "tmux"
-check "neovim" "nvim"
+[ "$BUILD_TMUX" = true ] && check "tmux" "tmux"
+[ "$BUILD_NVIM" = true ] && check "neovim" "nvim"
 check "fzf" "fzf"
 check "delta" "delta"
 check "gh" "gh"

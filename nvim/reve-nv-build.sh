@@ -5,20 +5,26 @@ set -e
 
 # Parse command line arguments
 INSTALL_PREFIX=""
+NO_DEPS=false
 while [[ $# -gt 0 ]]; do
   case $1 in
     -i|--install-dir)
       INSTALL_PREFIX="$2"
       shift 2
       ;;
+    --no-deps)
+      NO_DEPS=true
+      shift
+      ;;
     -h|--help)
-      echo "Usage: $0 [-i|--install-dir <path>]"
+      echo "Usage: $0 [-i|--install-dir <path>] [--no-deps]"
       echo "  -i, --install-dir: Specify custom install location (default: system-wide)"
+      echo "  --no-deps:         Skip apt dependency install (caller already installed them)"
       exit 0
       ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: $0 [-i|--install-dir <path>]"
+      echo "Usage: $0 [-i|--install-dir <path>] [--no-deps]"
       exit 1
       ;;
   esac
@@ -27,7 +33,9 @@ done
 nvim_path=$HOME/neovim
 
 # install build pre-reqs
-sudo apt-get install ninja-build gettext cmake curl build-essential -y
+if [ "$NO_DEPS" != true ]; then
+  sudo apt-get install ninja-build gettext cmake curl build-essential -y
+fi
 
 # remove repo (if exists) and clone the latest version
 rm -rf $nvim_path
