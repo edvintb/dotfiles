@@ -8,7 +8,9 @@
 
 set -e
 
-DOTFILES_DIR="$HOME/.dotfiles"
+# Resolve the actual repo location (dir containing this script), so the
+# ~/.dotfiles symlink points at the real checkout instead of at itself.
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 PREFIX="$HOME/.local"
 LOCAL_BIN="$PREFIX/bin"
 
@@ -179,8 +181,14 @@ ENVEOF
 # -----------------------------------------------
 # 2. Ensure base dirs / dotfiles self-symlink (needed by background installs)
 # -----------------------------------------------
-if [ ! -L "$HOME/.dotfiles" ]; then
-    ln -sf "$DOTFILES_DIR" "$HOME/.dotfiles"
+# Point ~/.dotfiles at the real checkout. Only create/repair the symlink when
+# it doesn't already resolve to $DOTFILES_DIR — this also fixes a prior
+# self-referential loop (~/.dotfiles -> ~/.dotfiles).
+if [ "$DOTFILES_DIR" != "$HOME/.dotfiles" ]; then
+    if [ ! -L "$HOME/.dotfiles" ] || [ "$(readlink "$HOME/.dotfiles")" != "$DOTFILES_DIR" ]; then
+        rm -f "$HOME/.dotfiles"
+        ln -sf "$DOTFILES_DIR" "$HOME/.dotfiles"
+    fi
 fi
 
 mkdir -p "$HOME/.config"
