@@ -216,6 +216,7 @@
       "/Users/edvinberhan/.vscode/extensions/swiftlang.swift-vscode-2.16.5"
     ]
   },
+  "model": "haiku",
   "hooks": {
     "SessionStart": [
       {
@@ -240,6 +241,7 @@
       }
     }
   },
+  "theme": "dark",
   "preferredNotifChannel": "kitty",
   "skipAutoPermissionPrompt": true,
   "permissionMode": "default",
@@ -297,6 +299,5 @@
       "tool": "Bash",
       "prompt": "run linters and formatters"
     }
-  ],
-  "model": "haiku"
+  ]
 }
