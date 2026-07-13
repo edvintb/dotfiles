@@ -102,5 +102,3 @@ pwf() {
 [ -f "$HOME/.dotfiles_rc" ] && source "$HOME/.dotfiles_rc"
 
 [ -f "$HOME/.ssh/agent.env" ] && source "$HOME/.ssh/agent.env"
-
-export GOOGLE_APPLICATION_CREDENTIALS=/home/edvinberhan/podchat-ai-sa-key.json
