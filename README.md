@@ -2,16 +2,52 @@
 
 ### Setup Instructions
 
-- Clone this repo to `$HOME/.dotfiles`
-- Install the relevant requirements
-    - [Optional] Homebrew path
-    - Use the Brewfile to install requirements using homebrew
-    - Oh-my-zsh installed through curl and the managed plugins are cloned
-      separately
-- Run `symlink.sh` to link the dotfiles in $HOME to the dotfiles in this
-  repository
+#### New machine (Linux / VM) — one shot
+
+Clone the repo and run `setup.sh`. It installs everything and symlinks the
+dotfiles in a single pass:
+
+```bash
+git clone https://github.com/edvintb/dotfiles.git ~/.dotfiles
+bash ~/.dotfiles/setup.sh              # add --tmux and/or --nvim to build those from source
+```
+
+Everything installs under `~/.local` (so it persists on ephemeral hosts).
+`setup.sh` runs the independent steps in parallel and:
+
+- Installs **oh-my-zsh** + the `zsh-autosuggestions` / `zsh-syntax-highlighting` plugins
+- Downloads standalone binaries: **fzf**, **git-delta**, **gh**, **Claude Code**, **uv**, **Node.js** (via nvm), **tree-sitter** CLI
+- Installs the **Rust toolchain** (rustup) and the Rust CLI tools — fd, rg, bat, eza, sd, dust, zoxide, hyperfine, tokei, … — via `ubuntu-install/rust-tools-install.sh`
+- Optionally builds **tmux** (`--tmux`) and/or **neovim** (`--nvim`) from source via `tmux/build-tmux.sh` / `nvim/nv-build.sh` (each installs its own apt build deps; `nv-build.sh` also installs the Python `pip`/`venv` deps Mason needs)
+- **Symlinks all dotfiles** into `$HOME` by delegating to `symlink.sh`
+- Sets up `~/.ssh/known_hosts` for github.com
+
+`curl` and `zsh` are assumed present on the base image; each build script pulls
+its own apt dependencies on demand.
+
+#### Symlinks only
+
+`symlink.sh` is the single source of truth for every dotfile symlink — it links
+`.zshrc`, `.bashrc`, `.gitconfig`, `vimrc`, `claude/`, and the `~/.config` tool
+configs. It backs up any pre-existing regular file to `<file>.backup` before
+linking and skips any config not present in the repo. `setup.sh` calls this same
+script, so the two never drift. Run it on its own to re-link without installing:
+
+```bash
+bash ~/.dotfiles/symlink.sh
+```
+
+Run `symlink-work.sh` to additionally link `~/bin-work` from an optional
+`.dotfiles-work/` checkout.
+
+#### Mac
+
+`setup.sh` is Linux/apt-based. On macOS, install the tools with Homebrew
+(`brew bundle` against the `Brewfile`) and then run `symlink.sh`.
+
 - Use `bin/` for any scripts you want added to `$PATH`
-- Use `zshrc_private/` for any environment variables and additional configuration. All files in this directory are sourced at the bottom of `.zshrc`
+- Put machine-specific env vars / secrets in `secrets.sh`, which `init.sh`
+  sources for both bash and zsh
 
 
 ### Requirements

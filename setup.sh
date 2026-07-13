@@ -295,40 +295,10 @@ log "✓ All parallel installs complete"
 echo ""
 echo ">>> Setting up dotfiles symlinks..."
 
-link() {
-    local src="$1"
-    local dst="$2"
-    if [ -L "$dst" ]; then
-        local current_target=$(readlink "$dst")
-        if [ "$current_target" = "$src" ]; then
-            return 0
-        else
-            rm "$dst"
-        fi
-    elif [ -e "$dst" ]; then
-        echo "⚠ Skipping (exists): $dst"
-        return 0
-    fi
-    mkdir -p "$(dirname "$dst")"
-    ln -s "$src" "$dst"
-    echo "✓ Linked: $dst"
-}
-
-link "$HOME/.dotfiles/init.sh" "$HOME/.dotfiles_rc"
-link "$HOME/.dotfiles/.zshrc" "$HOME/.zshrc"
-link "$HOME/.dotfiles/.bashrc" "$HOME/.bashrc"
-link "$HOME/.dotfiles/.gitconfig" "$HOME/.gitconfig"
-link "$HOME/.dotfiles/vimrc" "$HOME/.vimrc"
-mkdir -p "$HOME/.claude"
-link "$HOME/.dotfiles/claude/settings.json" "$HOME/.claude/settings.json"
-link "$HOME/.dotfiles/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
-link "$HOME/.dotfiles/nvim" "$HOME/.config/nvim"
-link "$HOME/.dotfiles/tmux" "$HOME/.config/tmux"
-link "$HOME/.dotfiles/lazygit" "$HOME/.config/lazygit"
-link "$HOME/.dotfiles/lf" "$HOME/.config/lf"
-link "$HOME/.dotfiles/bin" "$HOME/bin-personal"
-link "$HOME/.dotfiles/tmux/tmux.conf" "$HOME/.tmux.conf"
-echo "✓ Dotfiles linked"
+# symlink.sh is the single source of truth for every dotfile symlink: it backs
+# up any pre-existing regular file to <file>.backup before linking, and skips
+# sources that aren't present on this host.
+bash "$DOTFILES_DIR/symlink.sh"
 
 # -----------------------------------------------
 # 10. SSH setup (known_hosts for github)

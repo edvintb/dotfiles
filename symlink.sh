@@ -10,6 +10,13 @@ link() {
     local dst="$2"
     local make_executable="${3:-false}"
 
+    # Skip configs that aren't present in this repo (e.g. lf/sway on a host
+    # that doesn't ship them) so we never create a dangling symlink.
+    if [[ ! -e $src ]]; then
+        echo "⚠ Source missing, skipping: $src"
+        return 0
+    fi
+
     # Check if symlink already exists and points to the correct location
     if [[ -L $dst ]]; then
         local current_target=$(readlink "$dst")
