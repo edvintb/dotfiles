@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# pod-setup.sh — Full environment setup for local machines and VMs
+# setup.sh — Full environment setup for local machines and VMs
 # Installs oh-my-zsh, plugins, tools, and creates dotfiles symlinks
 #
 # Prerequisites:
@@ -32,8 +32,8 @@ while [[ $# -gt 0 ]]; do
         --nvim) BUILD_NVIM=true; shift ;;
         -h|--help)
             echo "Usage: $0 [--tmux] [--nvim]"
-            echo "  --tmux   build tmux from source (tmux/reve-build-tmux.sh)"
-            echo "  --nvim   build neovim from source (nvim/reve-nv-build.sh)"
+            echo "  --tmux   build tmux from source (tmux/build-tmux.sh)"
+            echo "  --nvim   build neovim from source (nvim/nv-build.sh)"
             exit 0
             ;;
         *)
@@ -93,7 +93,7 @@ wait_all_with_progress() {
 log ">>> Starting parallel installs (rustup, binary downloads)..."
 
 # NOTE: tmux/neovim build dependencies are NOT installed here — each build
-# script (tmux/reve-build-tmux.sh, nvim/reve-nv-build.sh) installs its own apt
+# script (tmux/build-tmux.sh, nvim/nv-build.sh) installs its own apt
 # deps, so this script doesn't need to know them. curl (for the downloads below)
 # and zsh are assumed present on the base image.
 
@@ -260,7 +260,7 @@ log ">>> Launching requested builds..."
 
 if [ "$BUILD_TMUX" = true ]; then
     (
-        if bash "$DOTFILES_DIR/tmux/reve-build-tmux.sh" -i "$PREFIX" > /tmp/tmux-build.log 2>&1; then
+        if bash "$DOTFILES_DIR/tmux/build-tmux.sh" -i "$PREFIX" > /tmp/tmux-build.log 2>&1; then
             echo "✓ tmux built from source"
         else
             echo "✗ tmux build FAILED (see /tmp/tmux-build.log)"
@@ -270,7 +270,7 @@ fi
 
 if [ "$BUILD_NVIM" = true ]; then
     (
-        if bash "$DOTFILES_DIR/nvim/reve-nv-build.sh" -i "$PREFIX" > /tmp/nvim-build.log 2>&1; then
+        if bash "$DOTFILES_DIR/nvim/nv-build.sh" -i "$PREFIX" > /tmp/nvim-build.log 2>&1; then
             echo "✓ neovim built from source"
         else
             echo "✗ neovim build FAILED (see /tmp/nvim-build.log)"

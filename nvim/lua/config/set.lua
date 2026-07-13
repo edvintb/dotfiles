@@ -12,9 +12,7 @@ vim.opt.nu = true
 vim.opt.rnu = false
 
 -- augment working directories --
-vim.g.augment_workspace_folders = {
-    "~/reve-training-data",
-}
+vim.g.augment_workspace_folders = {}
 
 -- tabs
 vim.opt.tabstop = 4

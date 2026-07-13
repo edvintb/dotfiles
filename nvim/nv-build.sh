@@ -41,6 +41,17 @@ $SUDO apt-get update -o DPkg::Lock::Timeout=300 -qq
 $SUDO apt-get install -o DPkg::Lock::Timeout=300 -y \
   ninja-build gettext cmake curl build-essential
 
+# --- install Mason's runtime prerequisites ---
+# Mason itself only installs *leaf* packages (ruff, pyright, lua_ls, ...) on top
+# of runtimes that must already exist on PATH; it can't apt-install them itself
+# because it runs unprivileged. Our mason-lspconfig ensure_installed includes
+# `ruff`, which Mason installs into a Python venv via pip -- so python3 needs
+# pip AND venv (stock Debian/Ubuntu python3 ships neither, which makes the
+# `ruff` install fail on every nvim startup). unzip/wget/tar cover the generic
+# download-and-extract path Mason uses for prebuilt binary packages.
+$SUDO apt-get install -o DPkg::Lock::Timeout=300 -y \
+  python3 python3-pip python3-venv unzip wget tar
+
 # remove repo (if exists) and clone the latest version
 rm -rf $nvim_path
 git clone https://github.com/neovim/neovim $nvim_path

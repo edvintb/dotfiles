@@ -49,7 +49,6 @@ export PATH=$PATH:$HOME/delta/target/release
 # Go binaries
 export PATH="${PATH}:/Users/edvintb/go/bin"
 export PATH=$PATH:/usr/local/go/bin
-export PATH=$PATH:/mnt/home/go/bin
 
 # set the tmux tmpdir environment variable
 export TMUX_TMPDIR=/tmp
@@ -58,8 +57,6 @@ export TERM="xterm-256color"  # Or export TERM="xterm-kitty"
 # Set the XDG_CONFIG_HOME env variable
 # export XDG_CONFIG_HOME=$HOME/.config/nvim
 # export XDG_CONFIG_HOME=""
-
-export PIP_EXTRA_INDEX_URL="https://us-west1-python.pkg.dev/dev-infra-422317/reve-python-packages/simple"
 
 # ========================================
 # Aliases (from .zshrc)

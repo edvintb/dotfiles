@@ -131,8 +131,7 @@ uvl() {
   # b) set UV_PROJECT_ENVIRONMENT (venv location).
   # c) set UV_CACHE_DIR (cache location in /tmp).
   # d) set UV_PYTHON for uv pip commands to use the correct venv (only if exists).
-  # e) set UV_EXTRA_INDEX_URL to match PIP_EXTRA_INDEX_URL for private packages.
-  # f) set UV_LINK_MODE=symlink for faster installs. This is safe because both
+  # e) set UV_LINK_MODE=symlink for faster installs. This is safe because both
   #    the venv and cache are in /tmp on the same filesystem, and both get
   #    wiped together when a new node is provisioned.
   (
@@ -141,7 +140,6 @@ uvl() {
     [[ -x "${venv_path}/bin/python" ]] && export UV_PYTHON="${venv_path}/bin/python"
     UV_PROJECT_ENVIRONMENT="${venv_path}" \
     UV_CACHE_DIR="${cache_path}" \
-    UV_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-}" \
     UV_LINK_MODE="symlink" \
     XDG_DATA_HOME="/tmp/.xdg-data" \
     UV_CREDENTIALS_DIR="/tmp/.uv-credentials" \
@@ -149,9 +147,6 @@ uvl() {
     [[ -n "${old_uv_python}" ]] && export UV_PYTHON="${old_uv_python}" || unset UV_PYTHON
   )
 }
-
-# reve aliases
-alias qu-install="PYTHONUSERBASE=$HOME/.local pip install --user -e /mnt/home/queryfile-util"
 
 # History configuration (HISTSIZE >= SAVEHIST so long-lived shells don't truncate on exit)
 HISTSIZE=200000                 # Commands to keep in memory
@@ -205,9 +200,6 @@ fpath+=~/.zfunc; autoload -Uz compinit; compinit
 # this is where the go binary lives
 export PATH="${PATH}:/Users/edvintb/go/bin"
 export PATH=$PATH:/usr/local/go/bin
-
-# this is where go places binaries
-export PATH=$PATH:/mnt/home/go/bin
 
 # . "$HOME/.local/bin/env"
 [ -f "$HOME/.ssh/agent.env" ] && source "$HOME/.ssh/agent.env"
