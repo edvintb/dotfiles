@@ -2,28 +2,33 @@
 
 ### Setup Instructions
 
-#### New machine (Linux / VM) — one shot
+#### New machine (Linux / VM)
 
-Clone the repo and run `setup.sh`. It installs everything and symlinks the
-dotfiles in a single pass:
+**`setup.sh` is the only script you need to run** — clone the repo and run it once:
 
 ```bash
 git clone https://github.com/edvintb/dotfiles.git ~/.dotfiles
-bash ~/.dotfiles/setup.sh              # add --tmux and/or --nvim to build those from source
+bash ~/.dotfiles/setup.sh --tmux --nvim
 ```
 
-Everything installs under `~/.local` (so it persists on ephemeral hosts).
-`setup.sh` runs the independent steps in parallel and:
+That single command does the whole setup in one pass — symlinking and secrets
+bootstrap included, so you don't run anything else afterwards. Everything
+installs under `~/.local` (persists on ephemeral hosts). Running the independent
+steps in parallel, it:
 
 - Installs **oh-my-zsh** + the `zsh-autosuggestions` / `zsh-syntax-highlighting` plugins
 - Downloads standalone binaries: **fzf**, **git-delta**, **gh**, **Claude Code**, **uv**, **Node.js** (via nvm), **tree-sitter** CLI
 - Installs the **Rust toolchain** (rustup) and the Rust CLI tools — fd, rg, bat, eza, sd, dust, zoxide, hyperfine, tokei, … — via `ubuntu-install/rust-tools-install.sh`
-- Optionally builds **tmux** (`--tmux`) and/or **neovim** (`--nvim`) from source via `tmux/build-tmux.sh` / `nvim/nv-build.sh` (each installs its own apt build deps; `nv-build.sh` also installs the Python `pip`/`venv` deps Mason needs)
-- **Symlinks all dotfiles** into `$HOME` by delegating to `symlink.sh`
+- **Symlinks all dotfiles** into `$HOME` (by calling `symlink.sh`) and creates a git-ignored `secrets.sh` from the template
 - Sets up `~/.ssh/known_hosts` for github.com
 
-`curl` and `zsh` are assumed present on the base image; each build script pulls
-its own apt dependencies on demand.
+**tmux and neovim are opt-in** — they're built from source only when you pass
+`--tmux` / `--nvim` (each installs its own apt build deps; `nv-build.sh` also
+installs the Python `pip`/`venv` deps Mason needs). Plain `bash ~/.dotfiles/setup.sh`
+installs everything *except* those two, so include the flags unless you already
+have them.
+
+`curl` and `zsh` are assumed present on the base image.
 
 #### Symlinks only
 
@@ -46,8 +51,9 @@ Run `symlink-work.sh` to additionally link `~/bin-work` from an optional
 (`brew bundle` against the `Brewfile`) and then run `symlink.sh`.
 
 - Use `bin/` for any scripts you want added to `$PATH`
-- Put machine-specific env vars / secrets in `secrets.sh`, which `init.sh`
-  sources for both bash and zsh
+- Put machine-specific env vars / secrets in `secrets.sh` — it's git-ignored and
+  created from `secrets.sh.example`, and `init.sh` sources it for both bash and
+  zsh (so real secrets never get committed)
 
 
 ### Requirements

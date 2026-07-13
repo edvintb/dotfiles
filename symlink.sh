@@ -76,3 +76,10 @@ mkdir -p $HOME/vault
 
 # link the tmux
 link $DOTFILES/tmux/tmux.conf $HOME/.tmux.conf
+
+# Bootstrap a local, git-ignored secrets.sh from the template on first run so
+# init.sh has something to source (real secrets never get committed).
+if [[ ! -e $DOTFILES/secrets.sh && -e $DOTFILES/secrets.sh.example ]]; then
+    cp "$DOTFILES/secrets.sh.example" "$DOTFILES/secrets.sh"
+    echo "✓ Created secrets.sh from template (edit it to add secrets)"
+fi
