@@ -52,6 +52,9 @@ mkdir -p $HOME/.claude
 link $DOTFILES/claude/settings.json $HOME/.claude/settings.json
 link $DOTFILES/claude/CLAUDE.md $HOME/.claude/CLAUDE.md
 
+# vim
+link $DOTFILES/vim $HOME/.vim
+
 # .config
 link $DOTFILES/nvim $HOME/.config/nvim
 link $DOTFILES/tmux $HOME/.config/tmux
@@ -64,10 +67,6 @@ link $DOTFILES/i3status $HOME/.config/i3status
 link $DOTFILES/redshift $HOME/.config/redshift
 link $DOTFILES/aerospace $HOME/.config/aerospace
 link $DOTFILES/karabiner $HOME/.config/karabiner
-
-# ssh (for agent-forwarding socket symlink — see ssh/rc)
-mkdir -p $HOME/.ssh
-link $DOTFILES/ssh/rc $HOME/.ssh/rc
 
 # directories
 link $DOTFILES/bin $HOME/bin-personal

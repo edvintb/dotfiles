@@ -70,3 +70,6 @@
 	useHttpPath = true
 [init]
 	defaultBranch = main
+[user]
+	email = edvinb33@gmail.com
+	name = edvintb

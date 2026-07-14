@@ -198,8 +198,11 @@ command -v zoxide &>/dev/null && eval "$(zoxide init zsh)"
 fpath+=~/.zfunc; autoload -Uz compinit; compinit
 
 # this is where the go binary lives
-export PATH="${PATH}:/Users/edvintb/go/bin"
+export PATH="${PATH}:$HOME/go/bin"
 export PATH=$PATH:/usr/local/go/bin
+
+# add rust binaries to path
+export PATH=$PATH:$HOME/.cargo/bin
 
 # . "$HOME/.local/bin/env"
 [ -f "$HOME/.ssh/agent.env" ] && source "$HOME/.ssh/agent.env"

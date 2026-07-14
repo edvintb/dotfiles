@@ -129,7 +129,8 @@
       "Bash(awk '{print $2}')",
       "Bash(rm -rf ~/.vscode/extensions/swiftlang.swift-vscode-2.16.5)",
       "WebFetch(domain:marketplace.visualstudio.com)",
-      "WebFetch(domain:forums.swift.org)"
+      "WebFetch(domain:forums.swift.org)",
+      "mcp__livekit-docs__docs_search"
     ],
     "deny": [],
     "ask": [],
@@ -151,6 +152,8 @@
     }
   },
   "theme": "dark",
+  "effortLevel": "low",
+  "skipWorkflowUsageWarning": true,
   "preferredNotifChannel": "kitty",
   "skipAutoPermissionPrompt": true,
   "permissionMode": "default",
