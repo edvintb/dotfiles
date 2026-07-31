@@ -278,24 +278,6 @@ ENVEOF
     fi
 ) &
 
-# --- tree-sitter CLI (needed for neovim treesitter plugin) ---
-(
-    # Ensure Node is available first by sourcing nvm
-    if [ -f "$HOME/.nvm/nvm.sh" ]; then
-        # shellcheck disable=SC1091
-        . "$HOME/.nvm/nvm.sh"
-    fi
-    # Check if tree-sitter is already installed globally
-    if npm list -g tree-sitter-cli > /dev/null 2>&1; then
-        echo "✓ tree-sitter (cached)"
-    elif command -v npm &> /dev/null; then
-        npm install -g tree-sitter-cli > /dev/null 2>&1
-        echo "✓ tree-sitter CLI installed"
-    else
-        echo "! tree-sitter skipped (npm not available)"
-    fi
-) &
-
 # -----------------------------------------------
 # 2. Ensure base dirs / dotfiles self-symlink (needed by background installs)
 # -----------------------------------------------
@@ -405,6 +387,7 @@ check "zsh" "zsh"
 [ -f "$HOME/.cargo/env" ] && echo "  ✓ ~/.cargo/env" || echo "  ✗ ~/.cargo/env: NOT FOUND"
 [ -f "$LOCAL_BIN/env" ] && echo "  ✓ ~/.local/bin/env" || echo "  ✗ ~/.local/bin/env: NOT FOUND"
 check "cargo" "cargo"
+check "tree-sitter CLI" "tree-sitter"
 check "fd" "fd"
 check "ripgrep" "rg"
 check "bat" "bat"

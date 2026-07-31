@@ -35,6 +35,7 @@ install_cargo_tool() {
 
 # Launch all installs in parallel
 TOOLS=(
+    tree-sitter-cli
     fd-find
     ripgrep
     bat

@@ -1,5 +1,6 @@
 brew 'zsh'
 brew 'neovim'
+brew 'tree-sitter-cli'
 brew 'ripgrep'
 brew 'fzf'
 brew 'gh'
