@@ -4,8 +4,11 @@ brew 'ripgrep'
 brew 'fzf'
 brew 'gh'
 brew 'git-delta'
+brew 'node'
 brew 'pure'
 brew 'tmux'
+brew 'uv'
+cask 'claude-code'
 
 # Rust performance tools (from CLAUDE.md)
 brew 'fd'              # Fast alternative to find

@@ -13,13 +13,8 @@ set -e
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 PREFIX="$HOME/.local"
 LOCAL_BIN="$PREFIX/bin"
-
-# Check if sudo is available and use it for apt-get
-if command -v sudo &> /dev/null && sudo -n true 2>/dev/null; then
-    SUDO="sudo"
-else
-    SUDO=""
-fi
+SETUP_OS="$(uname -s)"
+SETUP_ARCH="$(uname -m)"
 
 # tmux/neovim are compiled from source via the standalone build scripts and are
 # opt-in: only build them (and install the apt build deps they need) when the
@@ -43,6 +38,67 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# macOS uses native Homebrew packages. Keep this branch ahead of every Linux
+# download so Linux binaries can never be placed in ~/.local/bin on a Mac.
+if [ "$SETUP_OS" = "Darwin" ]; then
+    case "$SETUP_ARCH" in
+        arm64|x86_64) ;;
+        *) echo "Unsupported macOS architecture: $SETUP_ARCH" >&2; exit 1 ;;
+    esac
+
+    if [ "$BUILD_TMUX" = true ] || [ "$BUILD_NVIM" = true ]; then
+        echo "Note: --tmux and --nvim are Linux build flags; macOS installs both with Homebrew."
+    fi
+
+    if command -v brew > /dev/null 2>&1; then
+        BREW_BIN="$(command -v brew)"
+    elif [ -x /opt/homebrew/bin/brew ]; then
+        BREW_BIN=/opt/homebrew/bin/brew
+    elif [ -x /usr/local/bin/brew ]; then
+        BREW_BIN=/usr/local/bin/brew
+    else
+        echo "Homebrew is required on macOS: https://brew.sh" >&2
+        exit 1
+    fi
+
+    echo "============================================"
+    echo "  macOS Development Environment Setup"
+    echo "============================================"
+    "$BREW_BIN" bundle --file="$DOTFILES_DIR/Brewfile"
+
+    if [ "$DOTFILES_DIR" != "$HOME/.dotfiles" ]; then
+        if [ -e "$HOME/.dotfiles" ] && [ ! -L "$HOME/.dotfiles" ]; then
+            echo "$HOME/.dotfiles exists and is not a symlink; refusing to replace it." >&2
+            exit 1
+        fi
+        ln -sfn "$DOTFILES_DIR" "$HOME/.dotfiles"
+    fi
+
+    mkdir -p "$HOME/.config" "$HOME/.ssh"
+    zsh "$DOTFILES_DIR/symlink.sh"
+    if ! grep -q "github.com" "$HOME/.ssh/known_hosts" 2>/dev/null; then
+        ssh-keyscan github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null
+    fi
+
+    echo "macOS setup complete. Restart your shell with: exec zsh"
+    exit 0
+fi
+
+# The standalone archives and build scripts below currently target Linux
+# x86-64. Fail before making changes on unsupported systems.
+if [ "$SETUP_OS" != "Linux" ] || [ "$SETUP_ARCH" != "x86_64" ]; then
+    echo "Unsupported platform: ${SETUP_OS} ${SETUP_ARCH}." >&2
+    echo "Supported platforms: macOS (arm64/x86_64), Linux (x86_64)." >&2
+    exit 1
+fi
+
+# Check if sudo is available and use it for apt-get on Linux.
+if command -v sudo &> /dev/null && sudo -n true 2>/dev/null; then
+    SUDO="sudo"
+else
+    SUDO=""
+fi
 
 echo "============================================"
 echo "  Development Environment Setup"
@@ -115,9 +171,11 @@ RUST_PID=$!
 
 # --- fzf binary ---
 (
-    if [ -x "$LOCAL_BIN/fzf" ]; then
+    # Executable permission alone does not mean the binary matches this host.
+    if [ -x "$LOCAL_BIN/fzf" ] && "$LOCAL_BIN/fzf" --version > /dev/null 2>&1; then
         echo "✓ fzf (cached)"
     else
+        [ ! -e "$LOCAL_BIN/fzf" ] || rm -f "$LOCAL_BIN/fzf"
         FZF_VERSION=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
         curl -fsSL "https://github.com/junegunn/fzf/releases/download/v${FZF_VERSION}/fzf-${FZF_VERSION}-linux_amd64.tar.gz" | tar xz -C "$LOCAL_BIN"
         echo "✓ fzf downloaded"
@@ -298,7 +356,7 @@ echo ">>> Setting up dotfiles symlinks..."
 # symlink.sh is the single source of truth for every dotfile symlink: it backs
 # up any pre-existing regular file to <file>.backup before linking, and skips
 # sources that aren't present on this host.
-bash "$DOTFILES_DIR/symlink.sh"
+zsh "$DOTFILES_DIR/symlink.sh"
 
 # -----------------------------------------------
 # 10. SSH setup (known_hosts for github)
