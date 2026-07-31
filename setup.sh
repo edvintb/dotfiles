@@ -27,6 +27,12 @@ while [[ $# -gt 0 ]]; do
         --nvim) BUILD_NVIM=true; shift ;;
         -h|--help)
             echo "Usage: $0 [--tmux] [--nvim]"
+            echo ""
+            echo "Platform behavior:"
+            echo "  macOS arm64/x86-64  install Brewfile packages and link configs"
+            echo "  Linux x86-64        install standalone tools and link configs"
+            echo ""
+            echo "Linux-only build options:"
             echo "  --tmux   build tmux from source (tmux/build-tmux.sh)"
             echo "  --nvim   build neovim from source (nvim/nv-build.sh)"
             exit 0

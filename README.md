@@ -2,34 +2,40 @@
 
 ### Setup Instructions
 
-#### New machine (Linux, macOS, or VM)
+#### New machine
 
-**`setup.sh` is the only script you need to run** — clone the repo and run it once:
+Clone the repository and use `setup.sh` as the single entry point:
 
 ```bash
 git clone https://github.com/edvintb/dotfiles.git ~/.dotfiles
-bash ~/.dotfiles/setup.sh --tmux --nvim
+bash ~/.dotfiles/setup.sh
 ```
 
-That single command does the whole setup in one pass — symlinking and secrets
-bootstrap included, so you don't run anything else afterwards. On Linux x86-64,
-tools install under `~/.local` (which persists on ephemeral hosts), and the
-independent steps run in parallel. On macOS, the same script installs native
-packages from the Brewfile before applying the shared configuration.
+The script detects the platform before installing anything:
+
+| Platform | Installation strategy | Requirements |
+| --- | --- | --- |
+| macOS arm64 or x86-64 | Native packages from `Brewfile`; tmux and Neovim included | Homebrew, Git, and network access |
+| Linux x86-64 | Standalone tools under `~/.local`; optional source builds | curl, Git, zsh, and network access |
+| Other platforms | Exits without installing | Not currently supported |
+
+Both supported paths link the shared configuration, create a git-ignored
+`secrets.sh` from the example when needed, and add GitHub to SSH `known_hosts`.
+
+The Linux path additionally:
 
 - Installs **oh-my-zsh** + the `zsh-autosuggestions` / `zsh-syntax-highlighting` plugins
 - Downloads standalone binaries: **fzf**, **git-delta**, **gh**, **Claude Code**, **uv**, **Node.js** (via nvm), **tree-sitter** CLI
 - Installs the **Rust toolchain** (rustup) and the Rust CLI tools — fd, rg, bat, eza, sd, dust, zoxide, hyperfine, tokei, … — via `ubuntu-install/rust-tools-install.sh`
-- **Symlinks all dotfiles** into `$HOME` (by calling `symlink.sh`) and creates a git-ignored `secrets.sh` from the template
-- Sets up `~/.ssh/known_hosts` for github.com
 
-**tmux and neovim are opt-in** — they're built from source only when you pass
-`--tmux` / `--nvim` (each installs its own apt build deps; `nv-build.sh` also
-installs the Python `pip`/`venv` deps Mason needs). Plain `bash ~/.dotfiles/setup.sh`
-installs everything *except* those two, so include the flags unless you already
-have them.
+On Linux, tmux and Neovim source builds are opt-in:
 
-`curl` and `zsh` are assumed present on the base image.
+```bash
+bash ~/.dotfiles/setup.sh --tmux --nvim
+```
+
+These flags are unnecessary on macOS because the Brewfile installs both tools.
+They are accepted there only so the same bootstrap command remains harmless.
 
 #### Symlinks only
 
@@ -40,7 +46,7 @@ linking and skips any config not present in the repo. `setup.sh` calls this same
 script, so the two never drift. Run it on its own to re-link without installing:
 
 ```bash
-bash ~/.dotfiles/symlink.sh
+zsh ~/.dotfiles/symlink.sh
 ```
 
 Run `symlink-work.sh` to additionally link `~/bin-work` from an optional
@@ -49,8 +55,11 @@ Run `symlink-work.sh` to additionally link `~/bin-work` from an optional
 #### Mac
 
 `setup.sh` detects macOS and uses Homebrew, supporting both Apple Silicon and
-Intel Macs. The direct commands remain available if you only want to rerun the
-macOS-specific steps:
+Intel Macs. It deliberately runs the macOS branch before any Linux download,
+preventing incompatible binaries from being placed in `~/.local/bin`.
+
+The direct commands remain available if you only want to rerun the package or
+linking steps:
 
 ```bash
 brew bundle --file=~/.dotfiles/Brewfile
@@ -61,6 +70,12 @@ zsh ~/.dotfiles/symlink.sh
 - Put machine-specific env vars / secrets in `secrets.sh` — it's git-ignored and
   created from `secrets.sh.example`, and `init.sh` sources it for both bash and
   zsh (so real secrets never get committed)
+
+#### Secrets
+
+Never add credentials to tracked shell configuration. Put API tokens and
+machine-specific private values in `~/.dotfiles/secrets.sh`. Only
+`secrets.sh.example`, containing placeholder values, belongs in Git.
 
 
 ### Requirements
@@ -116,3 +131,14 @@ A basic vim configuration is included with sensible defaults. The `symlink.sh` s
 3. Under Features->Universal Actions, disable Ctrl (required for the Caps Lock
    mapping: tap for Escape, hold for Control, Right Shift+Caps for Caps Lock)
 4. Enable clipboard history
+
+### Karabiner configuration
+
+`karabiner/karabiner.json` defines one three-way Caps Lock rule:
+
+- Tap Caps Lock for Escape.
+- Hold Caps Lock while pressing another key for Left Control.
+- Press Right Shift+Caps Lock for literal Caps Lock.
+
+The tap decision uses a 250 ms timeout. The Right Shift chord is intentionally
+listed before the general dual-role rule so the more specific mapping wins.
