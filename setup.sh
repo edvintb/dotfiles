@@ -87,6 +87,12 @@ if [ "$SETUP_OS" = "Darwin" ]; then
         ssh-keyscan github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null
     fi
 
+    # Brewfile covers neovim itself; nvim-deps.sh covers the plugin-level deps
+    # it doesn't (ImageMagick, JDK, himalaya) and runs the headless bootstrap.
+    echo ""
+    echo ">>> Installing Neovim config dependencies..."
+    bash "$DOTFILES_DIR/nvim/nvim-deps.sh" || echo "✗ neovim config deps FAILED"
+
     echo "macOS setup complete. Restart your shell with: exec zsh"
     exit 0
 fi
@@ -345,6 +351,23 @@ echo ">>> Setting up dotfiles symlinks..."
 # up any pre-existing regular file to <file>.backup before linking, and skips
 # sources that aren't present on this host.
 zsh "$DOTFILES_DIR/symlink.sh"
+
+# -----------------------------------------------
+# 5. Neovim config dependencies + headless bootstrap
+# -----------------------------------------------
+# Everything the plugins shell out to (tree-sitter CLI, ImageMagick, JDK,
+# himalaya, ...) plus `Lazy! sync` / parser installs / mason servers. Runs here,
+# after symlink.sh, because the bootstrap needs ~/.config/nvim to exist and
+# after nv-build.sh, because it needs the nvim binary.
+if [ "$BUILD_NVIM" = true ]; then
+    echo ""
+    echo ">>> Installing Neovim config dependencies..."
+    if bash "$DOTFILES_DIR/nvim/nvim-deps.sh"; then
+        echo "✓ neovim config dependencies installed"
+    else
+        echo "✗ neovim config deps FAILED"
+    fi
+fi
 
 # -----------------------------------------------
 # 10. SSH setup (known_hosts for github)

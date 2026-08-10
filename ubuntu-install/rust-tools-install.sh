@@ -34,8 +34,11 @@ install_cargo_tool() {
 }
 
 # Launch all installs in parallel
+# NOTE: tree-sitter-cli is deliberately NOT here. Building it from source needs
+# libclang (bindgen), which isn't a dependency of this script, so it failed
+# silently on hosts without it. nvim/nvim-deps.sh owns that install — it prefers
+# the prebuilt binary and falls back to a cargo build with libclang in place.
 TOOLS=(
-    tree-sitter-cli
     fd-find
     ripgrep
     bat

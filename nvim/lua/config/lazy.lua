@@ -160,9 +160,10 @@ require("lazy").setup({
     },
 }, {
     -- options
-    -- rocks = {
-    --     hererocks = true,  -- recommended if you do not have global installation of Lua 5.1.
-    -- },
+    -- No plugin here needs a luarock (image.nvim is built with `build = false`
+    -- and driven by the magick_cli processor), so keep lazy from bootstrapping
+    -- hererocks/luarocks — it only ever shows up as a :checkhealth error.
+    rocks = { enabled = false },
 
     defaults = {
         lazy = false,
