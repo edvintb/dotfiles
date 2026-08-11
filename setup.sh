@@ -167,7 +167,10 @@ log ">>> Starting parallel installs (rustup, binary downloads)..."
 
 # --- Rust toolchain (needed before rust-tools-install) ---
 (
-    if command -v cargo &> /dev/null && [ -f "$HOME/.cargo/env" ]; then
+    # A present cargo is not a working toolchain: an interrupted rustup leaves
+    # the binaries in place with no manifest, and every build then fails with
+    # "Missing manifest in toolchain". Probe rustc before trusting the cache.
+    if command -v cargo &> /dev/null && [ -f "$HOME/.cargo/env" ] && rustc -vV &> /dev/null; then
         echo "✓ rust (cached)"
     else
         if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path > /tmp/rustup-install.log 2>&1; then
@@ -334,7 +337,13 @@ fi
 wait_with_progress $RUST_PID "rust toolchain"
 export PATH="$HOME/.cargo/bin:$PATH"
 if [ -f "$DOTFILES_DIR/ubuntu-install/rust-tools-install.sh" ]; then
-    bash "$DOTFILES_DIR/ubuntu-install/rust-tools-install.sh" &
+    (
+        if bash "$DOTFILES_DIR/ubuntu-install/rust-tools-install.sh" > /tmp/rust-tools.log 2>&1; then
+            echo "✓ rust tools installed"
+        else
+            echo "✗ some rust tools FAILED (see /tmp/rust-tools.log)"
+        fi
+    ) &
 fi
 
 # Wait for everything (initial bg downloads + dependent builds + rust tools)
@@ -417,6 +426,10 @@ check "bat" "bat"
 check "eza" "eza"
 check "sd" "sd"
 check "dust" "dust"
+check "xcp" "xcp"
+check "bottom" "btm"
+check "procs" "procs"
+check "xh" "xh"
 check "zoxide" "zoxide"
 check "hyperfine" "hyperfine"
 check "tokei" "tokei"
