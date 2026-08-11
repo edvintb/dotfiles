@@ -19,13 +19,12 @@ if ! command -v cargo &> /dev/null; then
     exit 1
 fi
 
-# Build dependencies. tree-sitter-cli pulls in rquickjs-sys, whose bindgen build
-# script needs libclang; without it the whole install dies with "Unable to find
-# libclang" and neovim then fails to build treesitter parsers at runtime.
+# Build dependencies. A bare cargo with no C toolchain fails at the link step,
+# which reads as a confusing per-crate error rather than a missing prerequisite.
+# (libclang is not needed here — nvim-deps.sh owns the one crate that wants it.)
 if command -v apt-get &> /dev/null; then
     if command -v sudo &> /dev/null && sudo -n true 2>/dev/null; then SUDO="sudo"; else SUDO=""; fi
     MISSING_DEPS=()
-    ls /usr/lib/llvm-*/lib/libclang.so* &> /dev/null || MISSING_DEPS+=(libclang-dev)
     command -v cc &> /dev/null || MISSING_DEPS+=(build-essential)
     command -v pkg-config &> /dev/null || MISSING_DEPS+=(pkg-config)
     if [ "${#MISSING_DEPS[@]}" -gt 0 ]; then
